@@ -6,7 +6,7 @@ Personal hybrid AI agent for Android (also iOS / Windows / macOS / Linux / Web).
 
 Download and sideload:
 
-- **[`releases/aether.apk`](./releases/aether.apk)** — package `com.aether.app.aether` (v1.0.1)
+- **[`releases/aether.apk`](./releases/aether.apk)** — package `com.aether.app.aether` (v1.0.1, arm64-v8a)
 
 1. Install the APK (allow unknown sources)
 2. Open Aether → **Connect** → paste your key from [console.x.ai](https://console.x.ai)

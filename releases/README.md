@@ -17,4 +17,4 @@ Installable Android packages (debug-signed release builds for sideload testing).
 4. Tap **Connect** / the broken heart → paste your xAI API key from [console.x.ai](https://console.x.ai)
 5. Chat with Grok, or use Imagine for image generation
 
-Requires Android 7.0+ (API 24), internet access for Grok/Imagine.
+Requires Android 7.0+ (API 24), **arm64** device/emulator, internet for Grok/Imagine.
