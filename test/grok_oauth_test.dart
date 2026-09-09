@@ -8,7 +8,7 @@ import 'package:http/testing.dart';
 void main() {
   test('requestDeviceCode parses xAI payload', () async {
     final client = MockClient((request) async {
-      expect(request.url.toString(), kGrokDeviceCodeUrl);
+      expect(request.url.toString(), grokDeviceCodeUrl);
       expect(request.bodyFields['client_id'], kGrokOAuthClientId);
       return http.Response(
         jsonEncode({

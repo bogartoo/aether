@@ -139,7 +139,17 @@ class AetherController extends ChangeNotifier {
         notifyListeners();
         return;
       }
-      errorMessage = e.toString();
+      final raw = e.toString();
+      if (kIsWeb &&
+          (raw.contains('Failed to fetch') ||
+              raw.contains('ClientException') ||
+              raw.contains('XMLHttpRequest'))) {
+        errorMessage =
+            'Grok sign-in from the browser is blocked by xAI CORS. '
+            'Use the Android / Windows app, or expand “Use API key instead”.';
+      } else {
+        errorMessage = raw;
+      }
       pendingDevice = null;
       phase = AuthPhase.signedOut;
       notifyListeners();

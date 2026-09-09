@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Public Grok-CLI OAuth client used by OpenCode / Hermes / peer agents.
@@ -13,6 +14,27 @@ const kGrokOAuthScope =
     'openid profile email offline_access grok-cli:access api:access';
 const kGrokDeviceCodeGrantType =
     'urn:ietf:params:oauth:grant-type:device_code';
+
+/// Optional CORS proxy base for Flutter web (see tool/oauth_cors_proxy.py).
+/// Pass with: --dart-define=AETHER_OAUTH_PROXY=http://127.0.0.1:8787
+const String kOAuthProxyBase = String.fromEnvironment('AETHER_OAUTH_PROXY');
+
+String get grokDeviceCodeUrl {
+  if (kOAuthProxyBase.isNotEmpty) {
+    return '$kOAuthProxyBase/oauth2/device/code';
+  }
+  // Sensible web default when running the bundled local proxy.
+  if (kIsWeb) return 'http://127.0.0.1:8787/oauth2/device/code';
+  return kGrokDeviceCodeUrl;
+}
+
+String get grokTokenUrl {
+  if (kOAuthProxyBase.isNotEmpty) {
+    return '$kOAuthProxyBase/oauth2/token';
+  }
+  if (kIsWeb) return 'http://127.0.0.1:8787/oauth2/token';
+  return kGrokTokenUrl;
+}
 
 class GrokDeviceCode {
   GrokDeviceCode({
@@ -124,7 +146,7 @@ class GrokOAuth {
 
   Future<GrokDeviceCode> requestDeviceCode() async {
     final response = await _client.post(
-      Uri.parse(kGrokDeviceCodeUrl),
+      Uri.parse(grokDeviceCodeUrl),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',
@@ -173,7 +195,7 @@ class GrokOAuth {
       }
 
       final response = await _client.post(
-        Uri.parse(kGrokTokenUrl),
+        Uri.parse(grokTokenUrl),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Accept': 'application/json',
@@ -220,7 +242,7 @@ class GrokOAuth {
 
   Future<GrokTokens> refresh(String refreshToken) async {
     final response = await _client.post(
-      Uri.parse(kGrokTokenUrl),
+      Uri.parse(grokTokenUrl),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
         'Accept': 'application/json',

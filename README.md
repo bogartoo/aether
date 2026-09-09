@@ -12,6 +12,17 @@ This uses xAI’s public device-code OAuth client (same path as OpenCode / Herme
 
 > Requires an active SuperGrok or X Premium+ subscription linked to the xAI account you approve. If OAuth succeeds but chat returns 403, use an API key from [console.x.ai](https://console.x.ai) as a fallback.
 
+### Web note
+
+Browsers cannot call `auth.x.ai` directly (CORS). For Flutter web locally:
+
+```bash
+python3 tool/oauth_cors_proxy.py
+flutter run -d chrome
+```
+
+Android / Windows / iOS talk to xAI natively — no proxy needed.
+
 ## Download APKs
 
 Ready-to-install Android builds are in [`releases/`](./releases/):
