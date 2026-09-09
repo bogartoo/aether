@@ -13,7 +13,7 @@ enum AuthPhase {
   error,
 }
 
-/// App-wide auth + chat controller.
+/// App-wide auth + chat + Imagine controller.
 class AetherController extends ChangeNotifier {
   AetherController({
     AuthStore? authStore,
@@ -45,7 +45,9 @@ class AetherController extends ChangeNotifier {
 
   final List<ChatMessage> messages = [];
   bool sending = false;
+  bool imageMode = false;
   String model = kDefaultGrokModel;
+  String imagineModel = kDefaultImagineModel;
 
   void setModel(String next) {
     if (next == model) return;
@@ -53,10 +55,24 @@ class AetherController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void setImagineModel(String next) {
+    if (next == imagineModel) return;
+    imagineModel = next;
+    notifyListeners();
+  }
+
+  void setImageMode(bool enabled) {
+    if (imageMode == enabled) return;
+    imageMode = enabled;
+    notifyListeners();
+  }
+
   static const systemPrompt =
       'You are Aether, a personal AI agent running on the user\'s device. '
-      'You are powered by Grok via their SuperGrok / X Premium+ subscription. '
-      'Be direct, capable, and helpful. Give full, useful answers.';
+      'You are powered by Grok via their SuperGrok / X Premium+ subscription '
+      '(or an xAI API key). Be direct, capable, and helpful. '
+      'When the user asks to create, draw, or generate an image, remind them '
+      'they can toggle Imagine mode or open the Imagine studio.';
 
   Future<void> bootstrap() async {
     phase = AuthPhase.loading;
@@ -79,8 +95,9 @@ class AetherController extends ChangeNotifier {
           messages.add(
             ChatMessage(
               role: 'assistant',
-              content:
-                  'Aether online. Signed in with your Grok account — subscription access, ready when you are.',
+              content: usingSubscription
+                  ? 'Aether online. Signed in with your Grok account — chat or flip Imagine to generate images.'
+                  : 'Aether online. API key connected — chat or flip Imagine to generate images.',
             ),
           );
         }
@@ -128,7 +145,7 @@ class AetherController extends ChangeNotifier {
           ChatMessage(
             role: 'assistant',
             content:
-                'Welcome. You\'re signed into Grok with your subscription. Ask me anything.',
+                'Welcome. You\'re signed into Grok with your subscription. Chat freely, or open Imagine.',
           ),
         );
       notifyListeners();
@@ -171,7 +188,12 @@ class AetherController extends ChangeNotifier {
     phase = AuthPhase.signedIn;
     messages
       ..clear()
-      ..add(ChatMessage(role: 'assistant', content: 'API key saved. Aether is ready.'));
+      ..add(
+        ChatMessage(
+          role: 'assistant',
+          content: 'API key saved. Chat or flip Imagine to generate images.',
+        ),
+      );
     notifyListeners();
   }
 
@@ -182,6 +204,7 @@ class AetherController extends ChangeNotifier {
     _apiKey = null;
     messages.clear();
     pendingDevice = null;
+    imageMode = false;
     phase = AuthPhase.signedOut;
     notifyListeners();
   }
@@ -198,9 +221,47 @@ class AetherController extends ChangeNotifier {
     return _tokens!.accessToken;
   }
 
+  bool looksLikeImageRequest(String text) {
+    final lower = text.toLowerCase().trim();
+    return lower.startsWith('/imagine ') ||
+        lower.startsWith('imagine ') ||
+        lower.startsWith('draw ') ||
+        lower.startsWith('generate an image') ||
+        lower.startsWith('generate image');
+  }
+
+  String imagePromptFrom(String text) {
+    final lower = text.toLowerCase();
+    if (lower.startsWith('/imagine ')) return text.substring(9).trim();
+    if (lower.startsWith('imagine ')) return text.substring(8).trim();
+    if (lower.startsWith('draw ')) return text.substring(5).trim();
+    if (lower.startsWith('generate an image')) {
+      return text
+          .replaceFirst(
+            RegExp(r'^generate an image[:\s]*', caseSensitive: false),
+            '',
+          )
+          .trim();
+    }
+    if (lower.startsWith('generate image')) {
+      return text
+          .replaceFirst(
+            RegExp(r'^generate image[:\s]*', caseSensitive: false),
+            '',
+          )
+          .trim();
+    }
+    return text.trim();
+  }
+
   Future<void> sendUserMessage(String text) async {
     final trimmed = text.trim();
     if (trimmed.isEmpty || sending) return;
+
+    if (imageMode || looksLikeImageRequest(trimmed)) {
+      await generateImageInChat(trimmed);
+      return;
+    }
 
     messages.add(ChatMessage(role: 'user', content: trimmed));
     final assistant =
@@ -213,6 +274,7 @@ class AetherController extends ChangeNotifier {
       final token = await _bearer();
       final forApi = messages
           .where((m) => !identical(m, assistant) && m.content.isNotEmpty)
+          .where((m) => !m.hasImage)
           .toList();
 
       final buffer = StringBuffer();
@@ -249,5 +311,57 @@ class AetherController extends ChangeNotifier {
       sending = false;
       notifyListeners();
     }
+  }
+
+  Future<void> generateImageInChat(String text) async {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty || sending) return;
+
+    final prompt = imagePromptFrom(trimmed);
+    messages.add(ChatMessage(role: 'user', content: trimmed));
+    final assistant = ChatMessage(
+      role: 'assistant',
+      content: 'Imagining…',
+      streaming: true,
+    );
+    messages.add(assistant);
+    sending = true;
+    notifyListeners();
+
+    try {
+      final token = await _bearer();
+      final image = await _client.generateImage(
+        accessToken: token,
+        prompt: prompt,
+        model: imagineModel,
+        responseFormat: 'b64_json',
+      );
+      assistant.content = 'Here you go.';
+      assistant.imageBase64 = image.b64Json;
+      assistant.imageUrl = image.url;
+    } on GrokClientException catch (e) {
+      assistant.content = e.message;
+    } catch (e) {
+      assistant.content = 'Imagine failed: $e';
+    } finally {
+      assistant.streaming = false;
+      sending = false;
+      notifyListeners();
+    }
+  }
+
+  /// Standalone Imagine studio call (does not append chat history).
+  Future<GeneratedImage> generateStudioImage({
+    required String prompt,
+    String? aspectRatio,
+  }) async {
+    final token = await _bearer();
+    return _client.generateImage(
+      accessToken: token,
+      prompt: prompt,
+      model: imagineModel,
+      aspectRatio: aspectRatio,
+      responseFormat: 'b64_json',
+    );
   }
 }

@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      'Your personal Grok.',
+                      'Your personal Grok — chat + Imagine.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontSize: 22,
@@ -92,7 +92,7 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Sign in with SuperGrok or X Premium+ — subscription access, not metered API keys.',
+                      'Sign in with SuperGrok or X Premium+ — subscription access, with Imagine baked in.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AetherColors.mist,
