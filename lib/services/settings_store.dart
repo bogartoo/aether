@@ -6,7 +6,10 @@ class SettingsStore {
   SettingsStore({
     FlutterSecureStorage? secureStorage,
     this._prefs,
-  }) : _secure = secureStorage ?? const FlutterSecureStorage();
+  }) : _secure = secureStorage ??
+            const FlutterSecureStorage(
+              aOptions: AndroidOptions(),
+            );
 
   static const _apiKeyKey = 'xai_api_key';
   static const _modelKey = 'grok_model';

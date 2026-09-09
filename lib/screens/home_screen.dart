@@ -68,6 +68,21 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       );
     });
+    if (!hasKey && mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Connect your xAI key to start testing Grok + Imagine.'),
+            action: SnackBarAction(
+              label: 'Connect',
+              onPressed: _openSettings,
+            ),
+            duration: const Duration(seconds: 6),
+          ),
+        );
+      });
+    }
   }
 
   @override

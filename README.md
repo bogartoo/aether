@@ -1,36 +1,33 @@
 # Aether
 
-Aether — personal hybrid AI agent. Flutter (Android / iOS / Windows / macOS / Linux / Web). **Broken-heart brand.** Grok chat + **Grok Imagine image generation baked in**.
+Personal hybrid AI agent for Android (also iOS / Windows / macOS / Linux / Web). **Broken-heart brand.** Grok chat + **Grok Imagine** image generation.
+
+## Test on Android (APK ready)
+
+Download and sideload:
+
+- **[`releases/aether.apk`](./releases/aether.apk)** — package `com.aether.app.aether` (v1.0.1)
+
+1. Install the APK (allow unknown sources)
+2. Open Aether → **Connect** → paste your key from [console.x.ai](https://console.x.ai)
+3. Chat, or open **Imagine** / toggle image mode
 
 ## What's in this build
 
-- **Broken heart logo** as the in-app mark and Android / web launcher icons
-- **Grok connect** via your xAI API key (stored locally with secure storage)
-- **Streaming chat** against Grok models
-- **Imagine** — dedicated studio + in-chat image mode (`/imagine …` or the image toggle)
-- Provider switcher scaffold for Ollama / Claude / Gemini (Grok is live)
+- Broken heart logo (launcher + in-app)
+- Grok streaming chat via xAI API key (stored on-device)
+- Imagine studio + in-chat image generation (`grok-imagine-image-2.0`)
+- Provider switcher scaffold (Ollama / Claude / Gemini)
 
-## Connect Grok
-
-1. Create a key at [console.x.ai](https://console.x.ai)
-2. Open Aether → tap the broken heart / Settings
-3. Paste the key → **Save & connect**
-
-## Imagine
-
-- Tap the image icon in the composer to toggle Imagine mode, or open **Imagine studio** from the header
-- Uses `grok-imagine-image-2.0` by default (changeable in Settings)
-
-## Run
+## Build from source
 
 ```bash
 flutter pub get
-flutter run -d chrome
-# or
-flutter run -d windows
 flutter build apk --release
+# output: build/app/outputs/flutter-apk/app-release.apk
+cp build/app/outputs/flutter-apk/app-release.apk releases/aether.apk
 ```
 
-## Download APKs
+## Other suite APKs
 
-Ready-to-install Android builds are in [`releases/`](./releases/) when published by the build pipeline.
+See [`releases/`](./releases/) for companion packages.
