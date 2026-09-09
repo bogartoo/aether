@@ -1,16 +1,24 @@
 # Aether
 
-Aether — personal + hybrid AI agent. Flutter (Android / iOS / Windows / web). Sign in with your **Grok** account (SuperGrok or X Premium+) for subscription-backed chat — or drop in an `xai-` API key.
+Personal hybrid AI agent for Android (also Windows / web). **Broken-heart brand.** Sign in with **Grok** (SuperGrok / X Premium+) for subscription chat — or paste an `xai-` API key. Includes **Grok Imagine** image generation.
+
+## Test on Android (APK ready)
+
+Download and sideload **[`releases/aether.apk`](./releases/aether.apk)** — package `com.aether.app.aether` (v1.0.2, arm64-v8a).
+
+1. Install the APK (allow unknown sources)
+2. Open Aether → **Sign in with Grok** (or paste a key from [console.x.ai](https://console.x.ai))
+3. Chat, toggle **Imagine**, or open the Imagine studio
 
 ## Sign in with Grok
 
-1. Open Aether and tap **Sign in with Grok**.
-2. Approve the device code at [accounts.x.ai](https://accounts.x.ai/oauth2/device) (the app opens this for you).
-3. Chat — tokens stay on-device and refresh automatically.
+1. Tap **Sign in with Grok**
+2. Approve the device code at [accounts.x.ai](https://accounts.x.ai/oauth2/device)
+3. Chat — tokens stay on-device and refresh automatically
 
-This uses xAI’s public device-code OAuth client (same path as OpenCode / Hermes). No password is typed into Aether.
+Uses xAI’s public device-code OAuth client (same path as OpenCode / Hermes). No password is typed into Aether.
 
-> Requires an active SuperGrok or X Premium+ subscription linked to the xAI account you approve. If OAuth succeeds but chat returns 403, use an API key from [console.x.ai](https://console.x.ai) as a fallback.
+> Requires an active SuperGrok or X Premium+ subscription. If OAuth succeeds but chat/Imagine returns 403, use an API key from [console.x.ai](https://console.x.ai).
 
 ### Web note
 
@@ -21,29 +29,27 @@ python3 tool/oauth_cors_proxy.py
 flutter run -d chrome
 ```
 
-Android / Windows / iOS talk to xAI natively — no proxy needed.
+Android / Windows talk to xAI natively — no proxy needed.
 
-## Download APKs
+## What's in this build
 
-Ready-to-install Android builds are in [`releases/`](./releases/):
-
-- [aether.apk](./releases/aether.apk)
-- [xai-toolkit.apk](./releases/xai-toolkit.apk)
-- [assetforge.apk](./releases/assetforge.apk)
-- [devforge.apk](./releases/devforge.apk)
-
-Rebuild `aether.apk` after pulling this branch to pick up Grok sign-in.
+- Broken heart logo (launcher + in-app)
+- Grok OAuth sign-in + API key fallback
+- Streaming Grok chat
+- Imagine studio + in-chat Imagine mode (`grok-imagine-image-2.0`)
+- On-device credential storage
 
 ## Build from source
 
 ```bash
 flutter pub get
-flutter run                 # device / emulator / chrome
-flutter build apk --release
+flutter run
+flutter build apk --release --target-platform android-arm64
+cp build/app/outputs/flutter-apk/app-release.apk releases/aether.apk
 ```
 
 ## Dev notes
 
 - OAuth: `lib/auth/grok_oauth.dart`
-- Chat API: `lib/api/grok_client.dart` → `https://api.x.ai/v1/chat/completions`
+- Chat + Imagine API: `lib/api/grok_client.dart`
 - Secure token store on mobile/desktop; SharedPreferences on web

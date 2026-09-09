@@ -5,11 +5,13 @@ class AetherColors {
   static const voidBlack = Color(0xFF061018);
   static const deepNavy = Color(0xFF0A1628);
   static const forestNight = Color(0xFF0D2B24);
+  static const heartNight = Color(0xFF1A0B14);
   static const panel = Color(0xFF12202E);
   static const panelAlt = Color(0xFF142433);
   static const border = Color(0xFF1E3A4C);
   static const mint = Color(0xFF00E5A8);
   static const cyan = Color(0xFF00B4D8);
+  static const heart = Color(0xFFE11D48);
   static const mist = Color(0xFF8BA3B5);
   static const ivory = Color(0xFFE8F1F5);
 }
@@ -24,6 +26,8 @@ ThemeData buildAetherTheme() {
     colorScheme: ColorScheme.fromSeed(
       seedColor: AetherColors.mint,
       brightness: Brightness.dark,
+      primary: AetherColors.mint,
+      secondary: AetherColors.heart,
       surface: AetherColors.deepNavy,
     ),
   );
@@ -76,6 +80,24 @@ ThemeData buildAetherTheme() {
         ),
       ),
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AetherColors.panel,
+      hintStyle: const TextStyle(color: AetherColors.mist),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: AetherColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(18),
+        borderSide: const BorderSide(color: AetherColors.mint, width: 1.4),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+    ),
   );
 }
 
@@ -86,9 +108,11 @@ BoxDecoration aetherBackdrop() {
       end: Alignment.bottomRight,
       colors: [
         AetherColors.deepNavy,
+        AetherColors.heartNight,
         AetherColors.forestNight,
         AetherColors.voidBlack,
       ],
+      stops: [0, 0.35, 0.7, 1],
     ),
   );
 }
