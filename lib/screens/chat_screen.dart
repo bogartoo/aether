@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../api/grok_client.dart';
 import '../state/aether_controller.dart';
+import '../theme/aether_logo.dart';
 import '../theme/aether_theme.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -62,23 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
                 child: Row(
                   children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [AetherColors.mint, AetherColors.cyan],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AetherColors.mint.withValues(alpha: 0.35),
-                            blurRadius: 16,
-                          ),
-                        ],
-                      ),
-                      child: const Icon(Icons.auto_awesome, color: Colors.black),
-                    ),
+                    const AetherLogo(size: 40),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

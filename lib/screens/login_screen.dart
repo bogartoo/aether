@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../state/aether_controller.dart';
+import '../theme/aether_logo.dart';
 import '../theme/aether_theme.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -66,28 +67,7 @@ class _LoginScreenState extends State<LoginScreen>
                           ),
                         ),
                         child: Center(
-                          child: Container(
-                            width: 88,
-                            height: 88,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              gradient: const LinearGradient(
-                                colors: [AetherColors.mint, AetherColors.cyan],
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AetherColors.mint.withValues(alpha: 0.35),
-                                  blurRadius: 28,
-                                  spreadRadius: 2,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.auto_awesome,
-                              size: 42,
-                              color: Colors.black,
-                            ),
-                          ),
+                          child: AetherLogo(size: 88, iconSize: 42),
                         ),
                       ),
                     ),
