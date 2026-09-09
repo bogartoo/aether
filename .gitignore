@@ -18,10 +18,9 @@ build/
 *.jks
 *.keystore
 
-# Large binaries — APKs available as agent artifacts
+# Local build dirs (release APKs live in releases/)
 apks/
 builds/
-*.apk
 
 # Misc
 .DS_Store
