@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class AetherColors {
+class HrtbrkrColors {
   static const voidBlack = Color(0xFF061018);
   static const deepNavy = Color(0xFF0A1628);
   static const forestNight = Color(0xFF0D2B24);
@@ -14,7 +14,7 @@ class AetherColors {
   static const ivory = Color(0xFFE8F1F5);
 }
 
-ThemeData buildAetherTheme() {
+ThemeData buildHrtbrkrTheme() {
   final display = GoogleFonts.spaceGroteskTextTheme();
   final body = GoogleFonts.ibmPlexSansTextTheme();
 
@@ -22,51 +22,51 @@ ThemeData buildAetherTheme() {
     brightness: Brightness.dark,
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AetherColors.mint,
+      seedColor: HrtbrkrColors.mint,
       brightness: Brightness.dark,
-      surface: AetherColors.deepNavy,
+      surface: HrtbrkrColors.deepNavy,
     ),
   );
 
   return base.copyWith(
-    scaffoldBackgroundColor: AetherColors.voidBlack,
+    scaffoldBackgroundColor: HrtbrkrColors.voidBlack,
     textTheme: body
         .merge(display)
         .apply(
-          bodyColor: AetherColors.ivory,
-          displayColor: AetherColors.ivory,
+          bodyColor: HrtbrkrColors.ivory,
+          displayColor: HrtbrkrColors.ivory,
         )
         .copyWith(
           displayLarge: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w700,
             letterSpacing: 1.2,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
           headlineMedium: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w700,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
           titleLarge: GoogleFonts.spaceGrotesk(
             fontWeight: FontWeight.w600,
             letterSpacing: 2,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
           bodyLarge: GoogleFonts.ibmPlexSans(
             height: 1.45,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
           bodyMedium: GoogleFonts.ibmPlexSans(
             height: 1.4,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
           labelLarge: GoogleFonts.ibmPlexSans(
             fontWeight: FontWeight.w600,
-            color: AetherColors.ivory,
+            color: HrtbrkrColors.ivory,
           ),
         ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: AetherColors.mint,
+        backgroundColor: HrtbrkrColors.mint,
         foregroundColor: Colors.black,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         textStyle: GoogleFonts.spaceGrotesk(
@@ -79,15 +79,15 @@ ThemeData buildAetherTheme() {
   );
 }
 
-BoxDecoration aetherBackdrop() {
+BoxDecoration hrtbrkrBackdrop() {
   return const BoxDecoration(
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        AetherColors.deepNavy,
-        AetherColors.forestNight,
-        AetherColors.voidBlack,
+        HrtbrkrColors.deepNavy,
+        HrtbrkrColors.forestNight,
+        HrtbrkrColors.voidBlack,
       ],
     ),
   );

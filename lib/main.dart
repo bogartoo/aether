@@ -2,55 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'screens/chat_screen.dart';
-import 'screens/login_screen.dart';
-import 'state/aether_controller.dart';
-import 'theme/aether_theme.dart';
+import 'screens/connect_screen.dart';
+import 'state/hrtbrkr_controller.dart';
+import 'theme/hrtbrkr_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const AetherRoot());
+  runApp(const HrtbrkrRoot());
 }
 
-class AetherRoot extends StatelessWidget {
-  const AetherRoot({super.key});
+class HrtbrkrRoot extends StatelessWidget {
+  const HrtbrkrRoot({super.key});
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => AetherController()..bootstrap(),
+      create: (_) => HrtbrkrController()..bootstrap(),
       child: MaterialApp(
-        title: 'Aether',
+        title: 'HRTBRKR',
         debugShowCheckedModeBanner: false,
-        theme: buildAetherTheme(),
-        home: const AetherGate(),
+        theme: buildHrtbrkrTheme(),
+        home: const HrtbrkrGate(),
       ),
     );
   }
 }
 
-class AetherGate extends StatelessWidget {
-  const AetherGate({super.key});
+class HrtbrkrGate extends StatelessWidget {
+  const HrtbrkrGate({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final phase = context.watch<AetherController>().phase;
+    final phase = context.watch<HrtbrkrController>().phase;
 
     switch (phase) {
-      case AuthPhase.loading:
+      case ConnPhase.loading:
+      case ConnPhase.connecting:
         return Scaffold(
           body: Container(
-            decoration: aetherBackdrop(),
+            decoration: hrtbrkrBackdrop(),
             child: const Center(
-              child: CircularProgressIndicator(color: AetherColors.mint),
+              child: CircularProgressIndicator(color: HrtbrkrColors.mint),
             ),
           ),
         );
-      case AuthPhase.signedIn:
+      case ConnPhase.connected:
         return const ChatScreen();
-      case AuthPhase.signedOut:
-      case AuthPhase.awaitingApproval:
-      case AuthPhase.error:
-        return const LoginScreen();
+      case ConnPhase.disconnected:
+      case ConnPhase.error:
+        return const ConnectScreen();
     }
   }
 }

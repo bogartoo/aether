@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.aether.app" "\0"
-            VALUE "FileDescription", "aether" "\0"
+            VALUE "CompanyName", "com.hrtbrkr.app" "\0"
+            VALUE "FileDescription", "HRTBRKR" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "aether" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.aether.app. All rights reserved." "\0"
-            VALUE "OriginalFilename", "aether.exe" "\0"
-            VALUE "ProductName", "aether" "\0"
+            VALUE "InternalName", "hrtbrkr" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.hrtbrkr.app. All rights reserved." "\0"
+            VALUE "OriginalFilename", "hrtbrkr.exe" "\0"
+            VALUE "ProductName", "HRTBRKR" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

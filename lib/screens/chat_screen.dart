@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../api/grok_client.dart';
-import '../state/aether_controller.dart';
-import '../theme/aether_logo.dart';
-import '../theme/aether_theme.dart';
+import '../api/edge0_client.dart';
+import '../state/hrtbrkr_controller.dart';
+import '../theme/hrtbrkr_logo.dart';
+import '../theme/hrtbrkr_theme.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -35,10 +35,9 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Future<void> _send(AetherController ctrl) async {
+  Future<void> _send(HrtbrkrController ctrl) async {
     final text = _controller.text;
     _controller.clear();
-    // Scroll as tokens arrive.
     void listener() => _scrollToEnd();
     ctrl.addListener(listener);
     try {
@@ -51,11 +50,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final ctrl = context.watch<AetherController>();
+    final ctrl = context.watch<HrtbrkrController>();
+    final label = ctrl.servedModel.isNotEmpty ? ctrl.servedModel : ctrl.model;
 
     return Scaffold(
       body: Container(
-        decoration: aetherBackdrop(),
+        decoration: hrtbrkrBackdrop(),
         child: SafeArea(
           child: Column(
             children: [
@@ -63,14 +63,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
                 child: Row(
                   children: [
-                    const AetherLogo(size: 40),
+                    const HrtbrkrLogo(size: 40),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'AETHER',
+                            'HRTBRKR',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                                   fontSize: 22,
                                   letterSpacing: 3,
@@ -78,45 +78,44 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                           ),
                           Text(
-                            ctrl.usingSubscription
-                                ? 'Grok · subscription'
-                                : 'Grok · API key',
+                            'Edge0 · $label · local',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: AetherColors.mist,
+                              color: HrtbrkrColors.mist,
                             ),
                           ),
                         ],
                       ),
                     ),
                     PopupMenuButton<String>(
-                      color: AetherColors.panel,
+                      color: HrtbrkrColors.panel,
                       onSelected: (v) async {
-                        if (v == 'signout') await ctrl.signOut();
+                        if (v == 'disconnect') await ctrl.disconnect();
                         if (v.startsWith('model:')) {
                           ctrl.setModel(v.substring(6));
                         }
                       },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'model:grok-4',
-                          child: Text('Model: grok-4'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'model:grok-3',
-                          child: Text('Model: grok-3'),
-                        ),
-                        const PopupMenuItem(
-                          value: 'model:grok-3-mini',
-                          child: Text('Model: grok-3-mini'),
-                        ),
-                        const PopupMenuDivider(),
-                        const PopupMenuItem(
-                          value: 'signout',
-                          child: Text('Sign out'),
-                        ),
-                      ],
-                      icon: const Icon(Icons.more_vert, color: AetherColors.mist),
+                      itemBuilder: (context) {
+                        final models = ctrl.availableModels.isEmpty
+                            ? kEdge0Models
+                            : ctrl.availableModels;
+                        return [
+                          ...models.map(
+                            (m) => PopupMenuItem(
+                              value: 'model:$m',
+                              child: Text(
+                                ctrl.model == m ? 'Model: $m ✓' : 'Model: $m',
+                              ),
+                            ),
+                          ),
+                          const PopupMenuDivider(),
+                          const PopupMenuItem(
+                            value: 'disconnect',
+                            child: Text('Disconnect'),
+                          ),
+                        ];
+                      },
+                      icon: const Icon(Icons.more_vert, color: HrtbrkrColors.mist),
                     ),
                   ],
                 ),
@@ -144,9 +143,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         minLines: 1,
                         maxLines: 5,
                         decoration: InputDecoration(
-                          hintText: 'Message Aether…',
+                          hintText: 'Message HRTBRKR…',
                           filled: true,
-                          fillColor: AetherColors.panel,
+                          fillColor: HrtbrkrColors.panel,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(28),
                             borderSide: BorderSide.none,
@@ -162,10 +161,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     FilledButton(
                       onPressed: ctrl.sending ? null : () => _send(ctrl),
                       style: FilledButton.styleFrom(
-                        backgroundColor: AetherColors.mint,
+                        backgroundColor: HrtbrkrColors.mint,
                         foregroundColor: Colors.black,
                         disabledBackgroundColor:
-                            AetherColors.mint.withValues(alpha: 0.4),
+                            HrtbrkrColors.mint.withValues(alpha: 0.4),
                         shape: const CircleBorder(),
                         padding: const EdgeInsets.all(14),
                       ),
@@ -210,13 +209,13 @@ class _MessageBubble extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           color: isYou
-              ? AetherColors.mint.withValues(alpha: 0.15)
-              : AetherColors.panelAlt,
+              ? HrtbrkrColors.mint.withValues(alpha: 0.15)
+              : HrtbrkrColors.panelAlt,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isYou
-                ? AetherColors.mint.withValues(alpha: 0.35)
-                : AetherColors.border,
+                ? HrtbrkrColors.mint.withValues(alpha: 0.35)
+                : HrtbrkrColors.border,
           ),
         ),
         child: SelectableText(
