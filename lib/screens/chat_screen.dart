@@ -16,6 +16,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final _controller = TextEditingController();
   final _scroll = ScrollController();
+  bool _imageMode = false;
 
   @override
   void dispose() {
@@ -37,11 +38,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> _send(HrtbrkrController ctrl) async {
     final text = _controller.text;
+    final asImage = _imageMode;
     _controller.clear();
+    if (asImage) setState(() => _imageMode = false);
     void listener() => _scrollToEnd();
     ctrl.addListener(listener);
     try {
-      await ctrl.sendUserMessage(text);
+      await ctrl.sendUserMessage(text, forceImage: asImage);
     } finally {
       ctrl.removeListener(listener);
       _scrollToEnd();
@@ -78,7 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                           ),
                           Text(
-                            'Local · $label',
+                            'Uncensored · $label',
                             style: const TextStyle(
                               fontSize: 12,
                               color: HrtbrkrColors.mist,
@@ -132,9 +135,21 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 16),
                 child: Row(
                   children: [
+                    IconButton(
+                      tooltip: _imageMode ? 'Image mode on' : 'Generate image',
+                      onPressed: ctrl.sending
+                          ? null
+                          : () => setState(() => _imageMode = !_imageMode),
+                      icon: Icon(
+                        Icons.image_outlined,
+                        color: _imageMode
+                            ? HrtbrkrColors.mint
+                            : HrtbrkrColors.mist,
+                      ),
+                    ),
                     Expanded(
                       child: TextField(
                         controller: _controller,
@@ -143,7 +158,9 @@ class _ChatScreenState extends State<ChatScreen> {
                         minLines: 1,
                         maxLines: 5,
                         decoration: InputDecoration(
-                          hintText: 'Message HRTBRKR…',
+                          hintText: _imageMode
+                              ? 'Image prompt…'
+                              : 'Message HRTBRKR… (/imagine …)',
                           filled: true,
                           fillColor: HrtbrkrColors.panel,
                           border: OutlineInputBorder(
@@ -157,7 +174,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         ),
                       ),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 8),
                     FilledButton(
                       onPressed: ctrl.sending ? null : () => _send(ctrl),
                       style: FilledButton.styleFrom(
@@ -177,7 +194,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                 color: Colors.black,
                               ),
                             )
-                          : const Icon(Icons.send_rounded),
+                          : Icon(
+                              _imageMode ? Icons.auto_awesome : Icons.send_rounded,
+                            ),
                     ),
                   ],
                 ),
@@ -218,9 +237,38 @@ class _MessageBubble extends StatelessWidget {
                 : HrtbrkrColors.border,
           ),
         ),
-        child: SelectableText(
-          message.content.isEmpty && message.streaming ? '…' : message.content,
-          style: const TextStyle(height: 1.4, fontSize: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (message.hasImage) ...[
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: message.imageBytes != null
+                    ? Image.memory(
+                        message.imageBytes!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                      )
+                    : Image.network(
+                        message.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        errorBuilder: (_, error, stack) => const Text(
+                          'Image failed to load',
+                          style: TextStyle(color: HrtbrkrColors.mist),
+                        ),
+                      ),
+              ),
+              if (message.content.isNotEmpty) const SizedBox(height: 10),
+            ],
+            if (message.content.isNotEmpty || message.streaming)
+              SelectableText(
+                message.content.isEmpty && message.streaming
+                    ? '…'
+                    : message.content,
+                style: const TextStyle(height: 1.4, fontSize: 15),
+              ),
+          ],
         ),
       ),
     );

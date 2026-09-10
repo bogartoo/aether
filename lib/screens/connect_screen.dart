@@ -89,7 +89,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      'Your own local LLM.',
+                      'Uncensored local AI.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontSize: 22,
@@ -98,7 +98,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Talks to a real model on your machine — Edge0 on Apple Silicon, or Ollama anywhere. No cloud AI accounts.',
+                      'Adult NSFW welcome. Chat + image gen on your machine — no cloud moralizing.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: HrtbrkrColors.mist,

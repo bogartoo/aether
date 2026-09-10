@@ -1,29 +1,30 @@
 #!/usr/bin/env python3
-"""Serve HRTBRKR Flutter web and proxy chat to a real local LLM.
+"""Serve HRTBRKR Flutter web, proxy chat to a real local LLM, and generate images.
 
-Upstream is an OpenAI-compatible server:
-  - Ollama:  http://127.0.0.1:11434/v1   (Linux / Windows / Mac)
-  - Edge0:   http://127.0.0.1:8000       (Apple Silicon + `edge0 serve`)
+Upstream chat (OpenAI-compatible):
+  - Ollama:  http://127.0.0.1:11434/v1
+  - Edge0:   http://127.0.0.1:8000
+
+Image backends (first that works):
+  1) HRTBRKR_SD_BASE — AUTOMATIC1111 / Forge / SD.Next  (.../sdapi/v1/txt2img)
+  2) Pollinations (https://image.pollinations.ai) — no key, adult-friendly
 
 Usage:
+  ollama create hrtbrkr -f tool/Modelfile.hrtbrkr
+  ollama serve
   flutter build web --release
-  # Terminal A — real model:
-  ollama serve && ollama pull llama3.2:3b
-  # or: edge0 serve edge0-8b
-
-  # Terminal B — HRTBRKR web + proxy:
-  HRTBRKR_LLM_BASE=http://127.0.0.1:11434/v1 \\
-  HRTBRKR_LLM_MODEL=llama3.2:3b \\
-    python3 tool/hrtbrkr_web_server.py --port 8080
+  HRTBRKR_LLM_MODEL=hrtbrkr python3 tool/hrtbrkr_web_server.py --port 8080
 """
 
 from __future__ import annotations
 
 import argparse
+import base64
 import json
 import mimetypes
 import os
 import urllib.error
+import urllib.parse
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -32,15 +33,18 @@ ROOT = Path(__file__).resolve().parents[1]
 WEB = ROOT / "build" / "web"
 
 DEFAULT_UPSTREAM = os.environ.get("HRTBRKR_LLM_BASE", "http://127.0.0.1:11434/v1").rstrip("/")
-DEFAULT_MODEL = os.environ.get("HRTBRKR_LLM_MODEL", "llama3.2:3b")
+DEFAULT_MODEL = os.environ.get("HRTBRKR_LLM_MODEL", "hrtbrkr")
+SD_BASE = os.environ.get("HRTBRKR_SD_BASE", "").rstrip("/")
+POLLINATIONS = os.environ.get(
+    "HRTBRKR_IMAGE_URL",
+    "https://image.pollinations.ai/prompt/{prompt}",
+)
 
 
 def _upstream_url(path: str) -> str:
     if not path.startswith("/"):
         path = "/" + path
-    # Upstream already includes /v1 — map our public paths.
     if path == "/healthz":
-        # Ollama has /api/tags; Edge0 has /healthz. Probe models list.
         if DEFAULT_UPSTREAM.endswith("/v1"):
             return DEFAULT_UPSTREAM + "/models"
         return DEFAULT_UPSTREAM.rstrip("/") + "/healthz"
@@ -52,6 +56,75 @@ def _upstream_url(path: str) -> str:
     return DEFAULT_UPSTREAM + path
 
 
+def _http_json(method: str, url: str, body: bytes | None = None, timeout: int = 600):
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "hrtbrkr-web-proxy/1.0",
+        },
+        method=method,
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.status, resp.read()
+
+
+def _generate_image(prompt: str, width: int = 768, height: int = 768) -> dict:
+    """Return OpenAI-style {data:[{url|b64_json}]}."""
+    prompt = (prompt or "abstract art").strip() or "abstract art"
+    # 1) Local Stable Diffusion WebUI
+    if SD_BASE:
+        payload = json.dumps(
+            {
+                "prompt": prompt,
+                "negative_prompt": "child, loli, shota, underage, underage",
+                "steps": 20,
+                "width": width,
+                "height": height,
+                "cfg_scale": 7,
+            }
+        ).encode("utf-8")
+        try:
+            status, raw = _http_json("POST", f"{SD_BASE}/sdapi/v1/txt2img", payload, timeout=300)
+            if status < 400:
+                data = json.loads(raw.decode("utf-8"))
+                images = data.get("images") or []
+                if images:
+                    return {
+                        "created": 0,
+                        "data": [{"b64_json": images[0], "revised_prompt": prompt}],
+                    }
+        except Exception as e:
+            print(f"[hrtbrkr] SD backend failed: {e}", flush=True)
+
+    # 2) Pollinations — returns raw image bytes at a prompt URL
+    q = urllib.parse.quote(prompt, safe="")
+    url = POLLINATIONS.format(prompt=q)
+    # Add params for size / no logo / seed-ish
+    sep = "&" if "?" in url else "?"
+    url = f"{url}{sep}width={width}&height={height}&nologo=true&safe=false"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "hrtbrkr/1.0"})
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            img = resp.read()
+            ctype = resp.headers.get("Content-Type", "image/jpeg")
+        b64 = base64.b64encode(img).decode("ascii")
+        return {
+            "created": 0,
+            "data": [
+                {
+                    "b64_json": b64,
+                    "url": f"data:{ctype};base64,{b64}",
+                    "revised_prompt": prompt,
+                }
+            ],
+        }
+    except Exception as e:
+        raise RuntimeError(f"Image generation failed: {e}") from e
+
+
 def _proxy(method: str, path: str, body: bytes | None, headers: dict) -> tuple[int, dict, bytes]:
     url = _upstream_url(path)
     req_headers = {
@@ -59,14 +132,14 @@ def _proxy(method: str, path: str, body: bytes | None, headers: dict) -> tuple[i
         "Accept": headers.get("Accept", "*/*"),
         "User-Agent": "hrtbrkr-web-proxy/1.0",
     }
-    # Force model name if client omitted / sent an Edge0 tier alias.
     if method == "POST" and body and path.endswith("/chat/completions"):
         try:
             payload = json.loads(body.decode("utf-8") or "{}")
         except Exception:
             payload = {}
         model = payload.get("model") or ""
-        if not model or model.startswith("edge0-"):
+        if not model or model.startswith("edge0-") or model in ("llama3.2:3b",):
+            # Prefer the uncensored HRTBRKR model when aliases are used.
             payload["model"] = DEFAULT_MODEL
             body = json.dumps(payload).encode("utf-8")
         req_headers["Content-Type"] = "application/json"
@@ -97,7 +170,6 @@ def _proxy(method: str, path: str, body: bytes | None, headers: dict) -> tuple[i
 
 
 def _proxy_stream(method: str, path: str, body: bytes | None, headers: dict, write):
-    """Stream SSE from upstream to the client."""
     url = _upstream_url(path)
     if body and path.endswith("/chat/completions"):
         try:
@@ -105,7 +177,7 @@ def _proxy_stream(method: str, path: str, body: bytes | None, headers: dict, wri
         except Exception:
             payload = {}
         model = payload.get("model") or ""
-        if not model or model.startswith("edge0-"):
+        if not model or model.startswith("edge0-") or model in ("llama3.2:3b",):
             payload["model"] = DEFAULT_MODEL
         payload["stream"] = True
         body = json.dumps(payload).encode("utf-8")
@@ -140,6 +212,15 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("Access-Control-Allow-Headers", "*")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 
+    def _json(self, code: int, obj):
+        body = json.dumps(obj).encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self._cors()
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_OPTIONS(self):  # noqa: N802
         self.send_response(204)
         self._cors()
@@ -149,7 +230,6 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         if path == "/healthz":
             status, hdrs, raw = _proxy("GET", "/healthz", None, dict(self.headers))
-            # Normalize to Edge0-style health for the Flutter client.
             model = DEFAULT_MODEL
             ok = status < 400
             try:
@@ -158,20 +238,23 @@ class Handler(BaseHTTPRequestHandler):
                     if data.get("model"):
                         model = data["model"]
                     elif data.get("data") and isinstance(data["data"], list) and data["data"]:
-                        model = data["data"][0].get("id") or model
-                    if data.get("status") == "ok":
-                        ok = True
+                        # Prefer hrtbrkr if listed
+                        ids = [x.get("id") for x in data["data"] if isinstance(x, dict)]
+                        if DEFAULT_MODEL in ids:
+                            model = DEFAULT_MODEL
+                        elif ids:
+                            model = ids[0] or model
             except Exception:
                 pass
-            body = json.dumps(
-                {"status": "ok" if ok else "error", "model": model, "upstream": DEFAULT_UPSTREAM}
-            ).encode("utf-8")
-            self.send_response(200 if ok else 502)
-            self.send_header("Content-Type", "application/json")
-            self._cors()
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
+            self._json(
+                200 if ok else 502,
+                {
+                    "status": "ok" if ok else "error",
+                    "model": model,
+                    "upstream": DEFAULT_UPSTREAM,
+                    "images": True,
+                },
+            )
             return
         if path.startswith("/v1/"):
             status, hdrs, raw = _proxy("GET", path, None, dict(self.headers))
@@ -188,14 +271,27 @@ class Handler(BaseHTTPRequestHandler):
         path = self.path.split("?", 1)[0]
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length) if length else b"{}"
+
+        if path == "/v1/images/generations":
+            try:
+                payload = json.loads(body.decode("utf-8") or "{}")
+            except Exception:
+                payload = {}
+            prompt = str(payload.get("prompt") or "")
+            size = str(payload.get("size") or "768x768")
+            try:
+                w, h = [int(x) for x in size.lower().split("x", 1)]
+            except Exception:
+                w, h = 768, 768
+            try:
+                result = _generate_image(prompt, width=w, height=h)
+                self._json(200, result)
+            except Exception as e:
+                self._json(500, {"error": {"message": str(e), "type": "image_error"}})
+            return
+
         if path != "/v1/chat/completions":
-            msg = json.dumps({"error": {"message": f"no route {path}"}}).encode()
-            self.send_response(404)
-            self.send_header("Content-Type", "application/json")
-            self._cors()
-            self.send_header("Content-Length", str(len(msg)))
-            self.end_headers()
-            self.wfile.write(msg)
+            self._json(404, {"error": {"message": f"no route {path}"}})
             return
 
         stream = False
@@ -228,15 +324,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def _static(self, path: str):
         if not WEB.is_dir():
-            msg = json.dumps(
-                {"error": {"message": "build/web missing — run: flutter build web --release"}}
-            ).encode()
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self._cors()
-            self.send_header("Content-Length", str(len(msg)))
-            self.end_headers()
-            self.wfile.write(msg)
+            self._json(
+                500,
+                {"error": {"message": "build/web missing — run: flutter build web --release"}},
+            )
             return
         rel = path.lstrip("/") or "index.html"
         candidate = (WEB / rel).resolve()
@@ -270,7 +361,8 @@ def main():
     if not WEB.is_dir():
         raise SystemExit(f"Missing {WEB} — run `flutter build web --release` first")
     print(
-        f"HRTBRKR web → real LLM upstream {DEFAULT_UPSTREAM} (model={DEFAULT_MODEL})",
+        f"HRTBRKR web → LLM {DEFAULT_UPSTREAM} model={DEFAULT_MODEL}  "
+        f"images={'sd:'+SD_BASE if SD_BASE else 'pollinations'}",
         flush=True,
     )
     print(f"Open http://{args.host}:{args.port}", flush=True)

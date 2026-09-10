@@ -1,25 +1,30 @@
 # HRTBRKR
 
-HRTBRKR — personal AI agent powered by a **real local LLM**. Flutter (Android / iOS / Windows / web). No Grok, no cloud API keys — chat goes to an OpenAI-compatible server on your machine.
+HRTBRKR — uncensored personal AI (adult NSFW OK) with **real local chat + image gen**. Flutter (Android / iOS / Windows / web). No Grok, no cloud API keys — chat goes to an OpenAI-compatible server on your machine.
 
 Supported local backends:
 
 | Backend | When | Command |
 |---------|------|---------|
 | **[Edge0](https://github.com/Edge0-AI/Edge0)** | Apple Silicon (MLX) — streaming MoE from the [announcement](https://x.com/samuelzengml/status/2097861839287927139) | `edge0 serve edge0-8b` → `:8000` |
-| **[Ollama](https://ollama.com)** | Linux / Windows / Mac — any GGUF chat model | `ollama serve` + `ollama run llama3.2:3b` → `:11434` |
+| **[Ollama](https://ollama.com)** | Linux / Windows / Mac — uncensored `hrtbrkr` model | `ollama create hrtbrkr -f tool/Modelfile.hrtbrkr` → `:11434` |
+
+## Images
+
+- In chat: tap the image button, or `/imagine <prompt>`, or “draw an image of …”
+- Backend: Pollinations by default, or set `HRTBRKR_SD_BASE` to an AUTOMATIC1111/Forge URL for fully local SD.
 
 ## Try the web UI (real model)
 
 ```bash
 # 1) real weights
 ollama serve
-ollama pull llama3.2:3b
+ollama create hrtbrkr -f tool/Modelfile.hrtbrkr
 
 # 2) HRTBRKR web + proxy to Ollama
 flutter build web --release
 HRTBRKR_LLM_BASE=http://127.0.0.1:11434/v1 \
-HRTBRKR_LLM_MODEL=llama3.2:3b \
+HRTBRKR_LLM_MODEL=hrtbrkr \
   python3 tool/hrtbrkr_web_server.py --port 8080
 
 # open http://127.0.0.1:8080 → Connect local LLM
