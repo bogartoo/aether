@@ -24,7 +24,7 @@ class HrtbrkrController extends ChangeNotifier {
 
   ConnPhase phase = ConnPhase.loading;
   String? errorMessage;
-  String baseUrl = kDefaultEdge0BaseUrl;
+  String baseUrl = defaultEdge0BaseUrl();
   String model = kDefaultEdge0Model;
   String servedModel = '';
   List<String> availableModels = List<String>.from(kEdge0Models);

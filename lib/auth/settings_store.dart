@@ -49,7 +49,7 @@ class SettingsStore {
 
   Future<String> loadBaseUrl() async {
     final v = await _read(_kBaseUrlKey);
-    if (v == null || v.trim().isEmpty) return kDefaultEdge0BaseUrl;
+    if (v == null || v.trim().isEmpty) return defaultEdge0BaseUrl();
     return v.trim();
   }
 

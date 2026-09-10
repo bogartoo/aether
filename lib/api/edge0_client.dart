@@ -1,10 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 /// Default Edge0 OpenAI-compatible server (see `edge0 serve`).
 const kDefaultEdge0BaseUrl = 'http://127.0.0.1:8000';
+
+/// On web, prefer same-origin so a demo host can proxy Edge0.
+String defaultEdge0BaseUrl() {
+  if (kIsWeb) {
+    final origin = Uri.base.origin;
+    if (origin.isNotEmpty && origin != 'null') return origin;
+  }
+  return kDefaultEdge0BaseUrl;
+}
 
 /// Edge0 model tiers from the open release.
 const kEdge0Models = <String>['edge0-8b', 'edge0-35b'];
@@ -43,8 +53,9 @@ class Edge0Health {
 
 /// OpenAI-compatible client aimed at a local `edge0 serve` process.
 class Edge0Client {
-  Edge0Client({http.Client? client, this.baseUrl = kDefaultEdge0BaseUrl})
-      : _client = client ?? http.Client();
+  Edge0Client({http.Client? client, String? baseUrl})
+      : baseUrl = baseUrl ?? defaultEdge0BaseUrl(),
+        _client = client ?? http.Client();
 
   final http.Client _client;
   String baseUrl;

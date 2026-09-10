@@ -28,6 +28,16 @@ Or use the helper in this repo:
 ./tool/edge0_serve.sh edge0-35b  # larger tier
 ```
 
+## Try the web demo (this machine)
+
+```bash
+flutter build web --release
+python3 tool/demo_web_server.py --port 8080
+# open http://127.0.0.1:8080 → Connect to Edge0
+```
+
+On web, HRTBRKR uses the same origin as a mock Edge0 API so you can chat without Apple Silicon.
+
 ## Run HRTBRKR
 
 ```bash
