@@ -16,9 +16,21 @@ String defaultEdge0BaseUrl() {
   return kDefaultEdge0BaseUrl;
 }
 
-/// Edge0 model tiers from the open release.
+/// Edge0 model tiers from the open release (Apple Silicon).
 const kEdge0Models = <String>['edge0-8b', 'edge0-35b'];
+
+/// Default local models when talking to Ollama / other OpenAI-compatible hosts.
+const kLocalModels = <String>['llama3.2:3b', 'llama3.2:1b', 'qwen2.5:3b'];
+
 const kDefaultEdge0Model = 'edge0-8b';
+const kDefaultOllamaModel = 'llama3.2:3b';
+
+/// Pick a sensible default model for the configured base URL.
+String defaultModelForBaseUrl(String baseUrl) {
+  final u = baseUrl.toLowerCase();
+  if (u.contains('11434') || u.contains('ollama')) return kDefaultOllamaModel;
+  return kDefaultEdge0Model;
+}
 
 class ChatMessage {
   ChatMessage({

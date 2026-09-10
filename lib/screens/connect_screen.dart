@@ -89,7 +89,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      'Your own Edge0 LLM.',
+                      'Your own local LLM.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             fontSize: 22,
@@ -98,7 +98,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'Runs a local Edge0 model on your machine — no cloud AI accounts, no API keys.',
+                      'Talks to a real model on your machine — Edge0 on Apple Silicon, or Ollama anywhere. No cloud AI accounts.',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: HrtbrkrColors.mist,
@@ -129,7 +129,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                               ),
                             )
                           : const Icon(Icons.power_settings_new_rounded),
-                      label: Text(connecting ? 'Connecting…' : 'Connect to Edge0'),
+                      label: Text(connecting ? 'Connecting…' : 'Connect local LLM'),
                     ),
                     const SizedBox(height: 12),
                     TextButton(
@@ -198,7 +198,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                     ],
                     const Spacer(flex: 1),
                     Text(
-                      'Start Edge0 first: edge0 serve edge0-8b',
+                      'Start a local model first: ollama run llama3.2:3b   or   edge0 serve edge0-8b',
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             color: HrtbrkrColors.mist.withValues(alpha: 0.75),
@@ -210,7 +210,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                       onPressed: () async {
                         await Clipboard.setData(
                           const ClipboardData(
-                            text: 'edge0 serve edge0-8b',
+                            text: 'ollama run llama3.2:3b',
                           ),
                         );
                         if (context.mounted) {
@@ -220,7 +220,7 @@ class _ConnectScreenState extends State<ConnectScreen>
                         }
                       },
                       child: const Text(
-                        'Copy serve command',
+                        'Copy ollama command',
                         style: TextStyle(color: HrtbrkrColors.mist, fontSize: 12),
                       ),
                     ),

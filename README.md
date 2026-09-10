@@ -1,73 +1,74 @@
 # HRTBRKR
 
-HRTBRKR — personal AI agent powered by **your own** [Edge0](https://github.com/Edge0-AI/Edge0) LLM. Flutter (Android / Windows / web). No Grok, no cloud API keys — chat goes to a local `edge0 serve` process over the OpenAI-compatible API.
+HRTBRKR — personal AI agent powered by a **real local LLM**. Flutter (Android / iOS / Windows / web). No Grok, no cloud API keys — chat goes to an OpenAI-compatible server on your machine.
 
-## How it works
+Supported local backends:
 
-1. Install and run Edge0 on an Apple Silicon Mac (MLX backend today).
-2. Open HRTBRKR and tap **Connect to Edge0**.
-3. Chat — prompts stay on your machine.
+| Backend | When | Command |
+|---------|------|---------|
+| **[Edge0](https://github.com/Edge0-AI/Edge0)** | Apple Silicon (MLX) — streaming MoE from the [announcement](https://x.com/samuelzengml/status/2097861839287927139) | `edge0 serve edge0-8b` → `:8000` |
+| **[Ollama](https://ollama.com)** | Linux / Windows / Mac — any GGUF chat model | `ollama serve` + `ollama run llama3.2:3b` → `:11434` |
 
-Edge0 streams MoE experts from SSD (`edge0-8b` ~1 GB peak RAM, `edge0-35b` ~2.9 GB). See the [Edge0 announcement](https://x.com/samuelzengml/status/2097861839287927139) and [docs](https://edge0.ai/models/edge0-35b).
-
-## Run Edge0 (Mac)
+## Try the web UI (real model)
 
 ```bash
-# in the Edge0 repo
+# 1) real weights
+ollama serve
+ollama pull llama3.2:3b
+
+# 2) HRTBRKR web + proxy to Ollama
+flutter build web --release
+HRTBRKR_LLM_BASE=http://127.0.0.1:11434/v1 \
+HRTBRKR_LLM_MODEL=llama3.2:3b \
+  python3 tool/hrtbrkr_web_server.py --port 8080
+
+# open http://127.0.0.1:8080 → Connect local LLM
+```
+
+Point the same server at Edge0 instead:
+
+```bash
+edge0 serve edge0-8b
+HRTBRKR_LLM_BASE=http://127.0.0.1:8000 \
+HRTBRKR_LLM_MODEL=edge0-8b \
+  python3 tool/hrtbrkr_web_server.py --port 8080
+```
+
+## Run the Flutter app
+
+```bash
+flutter pub get
+flutter run
+```
+
+Default desktop/mobile base URL is `http://127.0.0.1:8000` (Edge0). For Ollama, open **Server settings** and set:
+
+```text
+http://127.0.0.1:11434/v1
+```
+
+### Android emulator
+
+Use `http://10.0.2.2:11434/v1` (Ollama) or `http://10.0.2.2:8000` (Edge0) to reach the host.
+
+## Edge0 on Mac
+
+```bash
+# Edge0 checkout
 python3.12 -m venv .venv && .venv/bin/pip install -e '.[dev,fetch]'
 .venv/bin/python scripts/fetch_models.py --tier edge0-8b --target-dir models
 export EDGE0_8B_MODEL=$PWD/models/edge0-8b
 edge0 serve edge0-8b
-# → http://127.0.0.1:8000  (OpenAI-compatible /v1/chat/completions)
 ```
 
-Or use the helper in this repo:
-
-```bash
-./tool/edge0_serve.sh            # edge0-8b
-./tool/edge0_serve.sh edge0-35b  # larger tier
-```
-
-## Try the web demo (this machine)
-
-```bash
-flutter build web --release
-python3 tool/demo_web_server.py --port 8080
-# open http://127.0.0.1:8080 → Connect to Edge0
-```
-
-On web, HRTBRKR uses the same origin as a mock Edge0 API so you can chat without Apple Silicon.
-
-## Run HRTBRKR
-
-```bash
-flutter pub get
-flutter run                 # device / emulator / chrome
-flutter build apk --release
-```
-
-### Android emulator note
-
-`127.0.0.1` inside the emulator is the emulator itself. In **Server settings**, set the base URL to:
-
-```text
-http://10.0.2.2:8000
-```
-
-so traffic reaches Edge0 on your Mac host. On a physical phone, use your Mac’s LAN IP (and bind Edge0 with `--host 0.0.0.0` if needed).
-
-## Platforms
-
-| Surface | Notes |
-|---------|--------|
-| Flutter client | Android, Windows, web — talks to Edge0 over HTTP |
-| Edge0 server | Apple Silicon + MLX today; CUDA backend is on Edge0’s roadmap |
+Or: `./tool/edge0_serve.sh`
 
 ## Dev map
 
 - Connect UI: `lib/screens/connect_screen.dart`
 - Chat UI: `lib/screens/chat_screen.dart`
-- Edge0 client: `lib/api/edge0_client.dart` → `http://127.0.0.1:8000/v1/chat/completions`
+- LLM client: `lib/api/edge0_client.dart` (OpenAI-compatible)
+- Web + proxy: `tool/hrtbrkr_web_server.py`
 - State: `lib/state/hrtbrkr_controller.dart`
 
 ## TestFlight

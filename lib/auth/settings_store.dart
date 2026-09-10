@@ -57,7 +57,9 @@ class SettingsStore {
 
   Future<String> loadModel() async {
     final v = await _read(_kModelKey);
-    if (v == null || v.trim().isEmpty) return kDefaultEdge0Model;
+    if (v == null || v.trim().isEmpty) {
+      return defaultModelForBaseUrl(await loadBaseUrl());
+    }
     return v.trim();
   }
 

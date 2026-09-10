@@ -78,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                           ),
                           Text(
-                            'Edge0 · $label · local',
+                            'Local · $label',
                             style: const TextStyle(
                               fontSize: 12,
                               color: HrtbrkrColors.mist,
@@ -97,7 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       },
                       itemBuilder: (context) {
                         final models = ctrl.availableModels.isEmpty
-                            ? kEdge0Models
+                            ? <String>[...kLocalModels, ...kEdge0Models]
                             : ctrl.availableModels;
                         return [
                           ...models.map(

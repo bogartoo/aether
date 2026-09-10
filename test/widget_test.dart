@@ -21,7 +21,7 @@ void main() {
     );
 
     expect(find.text('HRTBRKR'), findsOneWidget);
-    expect(find.text('Connect to Edge0'), findsOneWidget);
-    expect(find.textContaining('Edge0'), findsWidgets);
+    expect(find.text('Connect local LLM'), findsOneWidget);
+    expect(find.textContaining('local'), findsWidgets);
   });
 }

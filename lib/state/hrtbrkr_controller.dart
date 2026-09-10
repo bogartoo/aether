@@ -25,9 +25,12 @@ class HrtbrkrController extends ChangeNotifier {
   ConnPhase phase = ConnPhase.loading;
   String? errorMessage;
   String baseUrl = defaultEdge0BaseUrl();
-  String model = kDefaultEdge0Model;
+  String model = defaultModelForBaseUrl(defaultEdge0BaseUrl());
   String servedModel = '';
-  List<String> availableModels = List<String>.from(kEdge0Models);
+  List<String> availableModels = <String>[
+    ...kLocalModels,
+    ...kEdge0Models,
+  ];
 
   bool get isConnected => phase == ConnPhase.connected;
 
@@ -51,7 +54,8 @@ class HrtbrkrController extends ChangeNotifier {
 
   static const systemPrompt =
       'You are HRTBRKR, a personal AI agent running on the user\'s device. '
-      'You are powered by a local Edge0 language model — nothing leaves the machine. '
+      'You run on a local language model — nothing leaves the machine unless '
+      'the user points you at a remote OpenAI-compatible endpoint. '
       'Be direct, capable, and helpful. Give full, useful answers.';
 
   Future<void> bootstrap() async {
@@ -60,6 +64,10 @@ class HrtbrkrController extends ChangeNotifier {
     try {
       baseUrl = await _store.loadBaseUrl();
       model = await _store.loadModel();
+      if (model == kDefaultEdge0Model &&
+          (baseUrl.contains('11434') || baseUrl.contains('ollama'))) {
+        model = kDefaultOllamaModel;
+      }
       _client.baseUrl = baseUrl;
       final wasConnected = await _store.loadConnected();
       if (wasConnected) {
@@ -83,14 +91,16 @@ class HrtbrkrController extends ChangeNotifier {
       _client.baseUrl = baseUrl;
       final health = await _client.health();
       if (!health.ok) {
-        throw Edge0ClientException('Edge0 reported unhealthy status');
+        throw Edge0ClientException('Local LLM reported unhealthy status');
       }
       servedModel = health.model;
-      if (servedModel.isNotEmpty && model != servedModel) {
-        // Prefer the model the server is actually serving.
+      if (servedModel.isNotEmpty) {
         model = servedModel;
       }
       availableModels = await _client.listModels();
+      if (availableModels.isEmpty) {
+        availableModels = <String>[...kLocalModels, ...kEdge0Models];
+      }
       if (!availableModels.contains(model) && availableModels.isNotEmpty) {
         model = availableModels.first;
       }
@@ -105,7 +115,7 @@ class HrtbrkrController extends ChangeNotifier {
           ChatMessage(
             role: 'assistant',
             content:
-                'HRTBRKR online. Local Edge0 · $model — your weights, your machine.',
+                'HRTBRKR online. Local model · $model — your weights, your machine.',
           ),
         );
       }
