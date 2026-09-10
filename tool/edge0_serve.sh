@@ -49,5 +49,21 @@ case "$TIER" in
 esac
 
 echo "HRTBRKR ← Edge0 serve $TIER on http://$HOST:$PORT"
-echo "Model path: $MODEL_DIR"
-exec $BIN serve "$MODEL_DIR" --host "$HOST" --port "$PORT"
+# Prefer the tier name so EDGE0_*_MODEL env vars resolve; fall back to a path.
+TARGET="$TIER"
+case "$TIER" in
+  edge0-8b|edge0-35b)
+    if [[ -n "${EDGE0_8B_MODEL:-}" && "$TIER" == "edge0-8b" ]]; then
+      TARGET="$EDGE0_8B_MODEL"
+    elif [[ -n "${EDGE0_35B_MODEL:-}" && "$TIER" == "edge0-35b" ]]; then
+      TARGET="$EDGE0_35B_MODEL"
+    elif [[ -d "$MODEL_DIR" ]]; then
+      TARGET="$MODEL_DIR"
+    fi
+    ;;
+  *)
+    TARGET="$MODEL_DIR"
+    ;;
+esac
+echo "Model: $TARGET"
+exec $BIN serve "$TARGET" --host "$HOST" --port "$PORT"
