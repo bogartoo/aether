@@ -1,10 +1,18 @@
-# Table Edge Brawl
+# Brinkbound
 
-Original **XR pass-through platform fighter** — plant two brawlers on your real table, rack up percent, hang off the lip, and blast rivals into the room. Not affiliated with Nintendo; characters **Rivet** and **Bolt** are originals.
+Free **WebXR** platform fighter for **Meta Quest 3** (pass-through AR) plus desktop sim.
 
-## Play
+No Unity. No paid engine license. No Nintendo IP — original roster and mechanics inspired by smash-style platform fighters.
 
-### Desktop simulator
+## Stack (all free)
+
+- Vite
+- Three.js
+- WebXR `immersive-ar` (Quest Browser)
+- Gamepad API (Xbox / PlayStation)
+- Keyboard (desktop)
+
+## Run
 
 ```bash
 cd xr-table-brawl
@@ -12,38 +20,28 @@ npm install
 npm run dev
 ```
 
-Open the URL Vite prints, then click **Play desktop sim**.
+Open the printed URL. On Quest: use the headset browser (HTTPS if remote). Desktop works immediately.
 
-| | Move | Attack | Special | Jump | Ledge climb |
-|---|---|---|---|---|---|
-| **P1 Rivet** | A / D | J | K | L / W / Space | I |
-| **P2 Bolt** | ← / → | 1 | 2 | 3 / ↑ | 5 |
+## Controls
 
-### Meta Quest pass-through AR
-
-1. `npm run build` then host `dist/` over **HTTPS** (Quest Browser requires a secure context).
-2. Open the page in **Meta Quest Browser**.
-3. Tap **Enter AR pass-through**.
-4. Point at your table until the reticle sticks, then **trigger** to place the stage.
-5. Right controller = Rivet, left = Bolt (or a light AI fills in if the left stick is idle).
+| | Move | Attack | Special | Smash | Jump | Climb | Dodge |
+|---|---|---|---|---|---|---|---|
+| **Keyboard P1** | A/D | J | K | U | L/W/Space | I | O |
+| **Keyboard P2** | ←/→ | 1 | 2 | 4 | 3/↑ | 5 | 6 |
+| **Quest / Xbox / PS** | Stick | Trigger / X□ | Grip / Y△ | B / RT | A | A | Stick click / LT |
 
 ## Features
 
-- Percent damage + knockback scaling
-- Table ledge grab, hang, climb, or drop
-- Stocks (3) and blast-zone KOs past the table edge
-- Desktop room + table sim for development without a headset
-- WebXR `immersive-ar` path for Quest-style pass-through
+- 10 original heroines with lore + portrait art
+- Table stage with ledge grab / hang / climb
+- Percent damage, smash charge, stocks, blast zones
+- Blood VFX on heavy knockback hits
+- Quest 3 controller-first mapping + Xbox/DualSense
+- Desktop room simulator when XR is unavailable
 
-## Project layout
+## Quest notes
 
-```
-xr-table-brawl/
-  index.html
-  src/main.js      # boot, HUD, XR session, game loop
-  src/fighter.js   # meshes, physics, combat, ledge state
-  src/stage.js     # desktop room + table mesh
-  src/input.js     # keyboard + Quest gamepad
-  src/constants.js
-  src/styles.css
-```
+1. `npm run build`
+2. Host `dist/` over HTTPS (Quest Browser needs a secure context)
+3. **Quest AR** → point at your table → trigger to place
+4. Right controller = P1, left = P2 (or AI fills in)

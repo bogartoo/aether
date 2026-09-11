@@ -34,15 +34,15 @@ Ready-to-install Android builds are in [`releases/`](./releases/):
 
 Rebuild `aether.apk` after pulling this branch to pick up Grok sign-in.
 
-## XR: Table Edge Brawl
+## Brinkbound (XR table fighter)
 
-Original WebXR / desktop platform fighter (pass-through table ledge brawl) lives in [`xr-table-brawl/`](./xr-table-brawl/):
+Free WebXR smash-style platform fighter for Meta Quest 3 + desktop — **no Unity, no paid license**.
 
 ```bash
 cd xr-table-brawl && npm install && npm run dev
 ```
 
-See that folder’s README for Quest AR instructions. Not affiliated with Nintendo.
+See [`xr-table-brawl/README.md`](./xr-table-brawl/README.md). Original roster (not Nintendo IP).
 
 ## Dev notes
 

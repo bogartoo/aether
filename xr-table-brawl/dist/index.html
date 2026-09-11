@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Table Edge Brawl — XR Pass-through Fighter</title>
+    <title>Brinkbound — XR Table Fighter</title>
     <meta
       name="description"
-      content="Original XR platform fighter. Drop fighters on your real table, hang from the edge, blast rivals off. Quest pass-through + desktop sim."
+      content="Free WebXR platform fighter for Meta Quest 3. Original heroine roster, ledge hangs, smash combat, Xbox/PlayStation pads. No Unity. No license."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -14,61 +14,92 @@
       href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/assets/index-tsxqr7rH.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-D5R9B5IZ.css">
+    <script type="module" crossorigin src="/assets/index-BW9-Inyd.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DtXVxAv3.css">
   </head>
   <body>
     <div id="boot">
       <div class="boot-bg" aria-hidden="true"></div>
       <header class="boot-hero">
-        <p class="eyebrow">XR · pass-through · original fighters</p>
-        <h1>TABLE EDGE<br />BRAWL</h1>
+        <p class="eyebrow">Quest 3 · pass-through · free WebXR</p>
+        <h1>BRINKBOUND</h1>
         <p class="tagline">
-          Plant two fighters on your real table. Hang off the ledge. Blast them into the void.
+          Original platform fighter on your real table. Ten heroines. Ledge hangs. Smash knockback.
+          Blood on heavy hits. No Unity. No license. No Nintendo IP.
         </p>
         <div class="cta-row">
-          <button id="btn-desktop" type="button" class="btn primary">Play desktop sim</button>
-          <button id="btn-vs-ai" type="button" class="btn ghost">Play vs AI</button>
-          <button id="btn-xr" type="button" class="btn ghost" disabled>
-            Enter AR pass-through
-          </button>
+          <button id="btn-continue" type="button" class="btn primary">Choose fighters</button>
         </div>
         <p id="xr-hint" class="hint">
-          Open this page in Meta Quest Browser for immersive AR. Desktop runs a full table simulator.
+          Desktop: keyboard + Xbox / DualSense. Quest Browser: enter pass-through AR and plant the
+          stage on your table.
         </p>
       </header>
-
       <section class="boot-how">
-        <h2>How it plays</h2>
+        <h2>Built for Quest 3 first</h2>
         <p>
-          Percent climbs. Knockback grows. Grab the table lip when you slip — climb up or jump off into a
-          counter. No Nintendo characters. Just original ledge brawlers on furniture.
+          Right stick move · trigger attack · grip special · A jump · B smash. Left stick drives P2
+          or AI. Same mapping on Xbox / PlayStation pads.
         </p>
       </section>
+    </div>
+
+    <div id="select" class="hidden">
+      <div class="select-shell">
+        <header class="select-head">
+          <h2>Roster</h2>
+          <p>Tap a slot, then a heroine. Every fighter has original lore and kit.</p>
+        </header>
+        <div class="pick-slots">
+          <button id="slot-p1" type="button" class="pick-slot active">
+            <span class="slot-label">P1</span>
+            <span id="pick-p1" class="slot-name">—</span>
+          </button>
+          <button id="slot-p2" type="button" class="pick-slot">
+            <span class="slot-label">P2</span>
+            <span id="pick-p2" class="slot-name">—</span>
+          </button>
+        </div>
+        <div id="roster-grid" class="roster-grid"></div>
+        <div id="lore-panel" class="lore-panel"></div>
+        <div class="select-actions">
+          <button id="btn-desktop" type="button" class="btn primary">Desktop duel</button>
+          <button id="btn-vs-ai" type="button" class="btn ghost">Vs AI</button>
+          <button id="btn-xr" type="button" class="btn ghost" disabled>Quest AR</button>
+        </div>
+      </div>
     </div>
 
     <div id="hud" class="hidden">
       <div class="stock-bar">
         <div class="fighter-hud p1">
-          <span class="name" id="p1-name">Rivet</span>
-          <span class="pct" id="p1-pct">0%</span>
-          <span class="stocks" id="p1-stocks"></span>
+          <img id="p1-portrait" class="portrait" alt="" />
+          <div>
+            <span class="name" id="p1-name">P1</span>
+            <span class="pct" id="p1-pct">0%</span>
+            <span class="stocks" id="p1-stocks"></span>
+          </div>
         </div>
         <div class="center-meta">
-          <span id="mode-label">DESKTOP SIM</span>
+          <span id="mode-label">DESKTOP</span>
+          <span id="input-label">Keyboard</span>
           <button id="btn-reset" type="button" class="btn tiny">Reset</button>
           <button id="btn-exit" type="button" class="btn tiny ghost">Exit</button>
         </div>
         <div class="fighter-hud p2">
-          <span class="name" id="p2-name">Bolt</span>
-          <span class="pct" id="p2-pct">0%</span>
-          <span class="stocks" id="p2-stocks"></span>
+          <div>
+            <span class="name" id="p2-name">P2</span>
+            <span class="pct" id="p2-pct">0%</span>
+            <span class="stocks" id="p2-stocks"></span>
+          </div>
+          <img id="p2-portrait" class="portrait" alt="" />
         </div>
       </div>
       <div id="toast" class="toast hidden"></div>
-      <aside id="controls-help" class="controls-help">
-        <strong>P1</strong> WASD move · J attack · K special · L jump · I grab ledge / climb<br />
-        <strong>P2</strong> arrows · 1 attack · 2 special · 3 jump · 5 climb
+      <aside class="controls-help">
+        <strong>P1</strong> WASD · J attack · K special · U smash · L jump · I climb · O dodge<br />
+        <strong>P2</strong> arrows · 1 attack · 2 special · 4 smash · 3 jump · 5 climb · 6 dodge<br />
+        <strong>Pads / Quest</strong> stick · X/□ attack · Y/△ special · RT/B smash · A jump
       </aside>
     </div>
 
