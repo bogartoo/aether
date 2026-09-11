@@ -31,6 +31,9 @@ class HrtbrkrController extends ChangeNotifier {
     ...kLocalModels,
     ...kEdge0Models,
   ];
+  String imageModel = 'nanobanana-pro';
+  List<Map<String, dynamic>> imageModels = const [];
+  bool imageHq = false;
 
   bool get isConnected => phase == ConnPhase.connected;
 
@@ -41,6 +44,12 @@ class HrtbrkrController extends ChangeNotifier {
     if (next == model) return;
     model = next;
     _store.saveModel(next);
+    notifyListeners();
+  }
+
+  void setImageModel(String next) {
+    if (next == imageModel) return;
+    imageModel = next;
     notifyListeners();
   }
 
@@ -111,6 +120,12 @@ class HrtbrkrController extends ChangeNotifier {
         model = availableModels.first;
       }
       servedModel = model;
+      imageHq = health.raw?['image_hq'] == true;
+      final defaultImg = health.raw?['image_model'] as String?;
+      if (defaultImg != null && defaultImg.isNotEmpty) {
+        imageModel = defaultImg;
+      }
+      imageModels = await _client.listImageModels();
 
       await _store.saveBaseUrl(baseUrl);
       await _store.saveModel(model);
@@ -118,12 +133,16 @@ class HrtbrkrController extends ChangeNotifier {
 
       phase = ConnPhase.connected;
       if (messages.isEmpty) {
+        final imgHint = imageHq
+            ? 'Images: $imageModel (Nano Banana / Grok / FLUX class).'
+            : 'Images need HRTBRKR_IMAGE_API_KEY for Nano Banana / Grok quality '
+                '(get free key: enter.pollinations.ai/keys).';
         messages.add(
           ChatMessage(
             role: 'assistant',
             content:
-                'HRTBRKR online · $model — uncensored local chat + image gen. '
-                'Ask anything adult. Use /imagine <prompt> or the image button.',
+                'HRTBRKR online · $model — uncensored local chat. $imgHint '
+                'Use /imagine <prompt> or the image button.',
           ),
         );
       }
@@ -187,17 +206,27 @@ class HrtbrkrController extends ChangeNotifier {
       final imagePrompt =
           forceImage ? trimmed : _extractImagePrompt(trimmed);
       if (imagePrompt != null && imagePrompt.isNotEmpty) {
-        assistant.content = 'Generating image…';
+        assistant.content = 'Generating with $imageModel…';
         notifyListeners();
-        final img = await _client.generateImage(prompt: imagePrompt);
+        final img = await _client.generateImage(
+          prompt: imagePrompt,
+          model: imageModel,
+          size: '1024x1024',
+          enhance: true,
+        );
+        final caption = StringBuffer();
+        caption.writeln(img.revisedPrompt ?? imagePrompt);
+        if (img.model != null && img.model!.isNotEmpty) {
+          caption.writeln('— ${img.model}');
+        }
+        if (img.warning != null && img.warning!.isNotEmpty) {
+          caption.writeln('⚠ ${img.warning}');
+        }
         assistant
-          ..content = img.revisedPrompt ?? imagePrompt
+          ..content = caption.toString().trim()
           ..imageBytes = img.bytes
           ..imageUrl = img.url
           ..streaming = false;
-        if (assistant.content.isEmpty) {
-          assistant.content = imagePrompt;
-        }
         return;
       }
 

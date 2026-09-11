@@ -72,11 +72,19 @@ class Edge0Health {
 }
 
 class GeneratedImage {
-  GeneratedImage({this.bytes, this.url, this.revisedPrompt});
+  GeneratedImage({
+    this.bytes,
+    this.url,
+    this.revisedPrompt,
+    this.model,
+    this.warning,
+  });
 
   final Uint8List? bytes;
   final String? url;
   final String? revisedPrompt;
+  final String? model;
+  final String? warning;
 }
 
 /// OpenAI-compatible client for local LLM + `/v1/images/generations`.
@@ -278,10 +286,43 @@ class Edge0Client {
     }
   }
 
+  /// Frontier image models (Nano Banana / Grok Imagine / FLUX.2).
+  static const kImageModels = <String>[
+    'nanobanana-pro',
+    'nanobanana',
+    'grok-imagine-pro',
+    'grok-imagine',
+    'flux-2-pro',
+    'flux',
+    'seedream',
+    'gptimage-large',
+  ];
+
+  Future<List<Map<String, dynamic>>> listImageModels() async {
+    try {
+      final response =
+          await _client.get(_uri('/v1/image/models'), headers: _headers);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return [
+          for (final id in kImageModels) {'id': id, 'label': id},
+        ];
+      }
+      final json = jsonDecode(response.body) as Map<String, dynamic>;
+      final data = json['data'] as List<dynamic>? ?? const [];
+      return data.whereType<Map>().map((e) => Map<String, dynamic>.from(e)).toList();
+    } catch (_) {
+      return [
+        for (final id in kImageModels) {'id': id, 'label': id},
+      ];
+    }
+  }
+
   /// OpenAI-compatible image generation (`POST /v1/images/generations`).
   Future<GeneratedImage> generateImage({
     required String prompt,
-    String size = '768x768',
+    String model = 'nanobanana-pro',
+    String size = '1024x1024',
+    bool enhance = true,
   }) async {
     final response = await _client
         .post(
@@ -289,16 +330,25 @@ class Edge0Client {
           headers: _headers,
           body: jsonEncode({
             'prompt': prompt,
+            'model': model,
             'size': size,
             'n': 1,
             'response_format': 'b64_json',
+            'enhance': enhance,
           }),
         )
-        .timeout(const Duration(seconds: 180));
+        .timeout(const Duration(seconds: 240));
 
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      String detail = response.body;
+      try {
+        final err = jsonDecode(response.body) as Map<String, dynamic>;
+        detail = (err['error'] is Map ? err['error']['message'] : err['error'])
+                ?.toString() ??
+            detail;
+      } catch (_) {}
       throw Edge0ClientException(
-        'Image generation failed (${response.statusCode}): ${response.body}',
+        'Image generation failed (${response.statusCode}): $detail',
         statusCode: response.statusCode,
       );
     }
@@ -312,6 +362,8 @@ class Edge0Client {
     final revised = first['revised_prompt'] as String?;
     final b64 = first['b64_json'] as String?;
     final url = first['url'] as String?;
+    final usedModel = json['model'] as String? ?? model;
+    final warning = json['warning'] as String?;
     Uint8List? bytes;
     if (b64 != null && b64.isNotEmpty) {
       bytes = base64Decode(b64);
@@ -319,6 +371,12 @@ class Edge0Client {
       final comma = url.indexOf(',');
       if (comma > 0) bytes = base64Decode(url.substring(comma + 1));
     }
-    return GeneratedImage(bytes: bytes, url: url, revisedPrompt: revised);
+    return GeneratedImage(
+      bytes: bytes,
+      url: url,
+      revisedPrompt: revised,
+      model: usedModel,
+      warning: warning,
+    );
   }
 }

@@ -9,6 +9,24 @@ Supported local backends:
 | **[Edge0](https://github.com/Edge0-AI/Edge0)** | Apple Silicon (MLX) — streaming MoE from the [announcement](https://x.com/samuelzengml/status/2097861839287927139) | `edge0 serve edge0-8b` → `:8000` |
 | **[Ollama](https://ollama.com)** | Linux / Windows / Mac — uncensored `hrtbrkr` model | `ollama create hrtbrkr -f tool/Modelfile.hrtbrkr` → `:11434` |
 
+## High-quality images (Nano Banana / Grok / FLUX)
+
+Frontier image models need an API key (this VM has no GPU for local Flux).
+
+1. Create a free key: https://enter.pollinations.ai/keys
+2. Restart the server with:
+
+```bash
+export HRTBRKR_IMAGE_API_KEY=sk_your_key_here
+export HRTBRKR_IMAGE_MODEL=nanobanana-pro   # or grok-imagine-pro / flux-2-pro
+python3 tool/hrtbrkr_web_server.py --port 8080
+```
+
+Or use `FAL_KEY` (FLUX Pro) / `XAI_API_KEY` (native Grok Imagine).
+
+In the app menu, pick **Image: Nano Banana Pro** or **Grok Imagine Pro**.
+Prompts are auto-enhanced by the local LLM before generation.
+
 ## Images
 
 - In chat: tap the image button, or `/imagine <prompt>`, or “draw an image of …”

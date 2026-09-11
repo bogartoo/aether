@@ -81,7 +81,9 @@ class _ChatScreenState extends State<ChatScreen> {
                                 ),
                           ),
                           Text(
-                            'Uncensored · $label',
+                            ctrl.imageHq
+                                ? 'Uncensored · $label · ${ctrl.imageModel}'
+                                : 'Uncensored · $label · images need API key',
                             style: const TextStyle(
                               fontSize: 12,
                               color: HrtbrkrColors.mist,
@@ -97,20 +99,42 @@ class _ChatScreenState extends State<ChatScreen> {
                         if (v.startsWith('model:')) {
                           ctrl.setModel(v.substring(6));
                         }
+                        if (v.startsWith('img:')) {
+                          ctrl.setImageModel(v.substring(4));
+                        }
                       },
                       itemBuilder: (context) {
                         final models = ctrl.availableModels.isEmpty
                             ? <String>[...kLocalModels, ...kEdge0Models]
                             : ctrl.availableModels;
+                        final imgModels = ctrl.imageModels.isEmpty
+                            ? [
+                                for (final id in Edge0Client.kImageModels)
+                                  {'id': id, 'label': id},
+                              ]
+                            : ctrl.imageModels;
                         return [
                           ...models.map(
                             (m) => PopupMenuItem(
                               value: 'model:$m',
                               child: Text(
-                                ctrl.model == m ? 'Model: $m ✓' : 'Model: $m',
+                                ctrl.model == m ? 'Chat: $m ✓' : 'Chat: $m',
                               ),
                             ),
                           ),
+                          const PopupMenuDivider(),
+                          ...imgModels.map((m) {
+                            final id = '${m['id']}';
+                            final label = '${m['label'] ?? id}';
+                            return PopupMenuItem(
+                              value: 'img:$id',
+                              child: Text(
+                                ctrl.imageModel == id
+                                    ? 'Image: $label ✓'
+                                    : 'Image: $label',
+                              ),
+                            );
+                          }),
                           const PopupMenuDivider(),
                           const PopupMenuItem(
                             value: 'disconnect',
