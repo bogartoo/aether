@@ -25,7 +25,7 @@ class _ConnectScreenState extends State<ConnectScreen>
     super.initState();
     _pulse = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2200),
+      duration: const Duration(milliseconds: 2600),
     )..repeat(reverse: true);
     final ctrl = context.read<HrtbrkrController>();
     _urlController = TextEditingController(text: ctrl.baseUrl);
@@ -54,16 +54,18 @@ class _ConnectScreenState extends State<ConnectScreen>
         child: SafeArea(
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 520),
+              constraints: const BoxConstraints(maxWidth: 420),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 28),
+                padding: const EdgeInsets.symmetric(horizontal: 32),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Spacer(flex: 2),
+                    const Spacer(flex: 3),
                     FadeTransition(
-                      opacity: Tween(begin: 0.72, end: 1.0).animate(
-                        CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+                      opacity: Tween(begin: 0.82, end: 1.0).animate(
+                        CurvedAnimation(
+                          parent: _pulse,
+                          curve: Curves.easeInOut,
+                        ),
                       ),
                       child: ScaleTransition(
                         scale: Tween(begin: 0.96, end: 1.0).animate(
@@ -72,37 +74,27 @@ class _ConnectScreenState extends State<ConnectScreen>
                             curve: Curves.easeInOut,
                           ),
                         ),
-                        child: const Center(
-                          child: HrtbrkrLogo(size: 88, iconSize: 42),
-                        ),
+                        child: const HrtbrkrLogo(size: 100, iconSize: 48),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    const SizedBox(height: 32),
                     Text(
                       'HRTBRKR',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
                             fontSize: 42,
-                            letterSpacing: 6,
+                            letterSpacing: 10,
                             fontWeight: FontWeight.w800,
                           ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
                     Text(
-                      'Uncensored local AI.',
+                      'Your model. Your rules.',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontSize: 22,
-                            color: HrtbrkrColors.ivory,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      'Adult NSFW welcome. Chat + image gen on your machine — no cloud moralizing.',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: HrtbrkrColors.mist,
-                            fontSize: 15,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: HrtbrkrColors.mute,
+                            fontSize: 16,
+                            letterSpacing: 0.2,
                           ),
                     ),
                     const Spacer(flex: 2),
@@ -111,120 +103,117 @@ class _ConnectScreenState extends State<ConnectScreen>
                         ctrl.errorMessage!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
-                          color: Color(0xFFFF8A80),
+                          color: HrtbrkrColors.danger,
                           fontSize: 13,
+                          height: 1.35,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 18),
                     ],
-                    FilledButton.icon(
-                      onPressed: connecting ? null : () => _connect(ctrl),
-                      icon: connecting
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.black,
-                              ),
-                            )
-                          : const Icon(Icons.power_settings_new_rounded),
-                      label: Text(connecting ? 'Connecting…' : 'Connect local LLM'),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: connecting ? null : () => _connect(ctrl),
+                        child: connecting
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Text('Connect'),
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
                     TextButton(
                       onPressed: () =>
                           setState(() => _showAdvanced = !_showAdvanced),
                       child: Text(
-                        _showAdvanced ? 'Hide server settings' : 'Server settings',
-                        style: const TextStyle(color: HrtbrkrColors.mist),
+                        _showAdvanced ? 'Hide settings' : 'Settings',
                       ),
                     ),
-                    if (_showAdvanced) ...[
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _urlController,
-                        enabled: !connecting,
-                        keyboardType: TextInputType.url,
-                        decoration: InputDecoration(
-                          hintText: kDefaultEdge0BaseUrl,
-                          labelText: 'Edge0 base URL',
-                          filled: true,
-                          fillColor: HrtbrkrColors.panel,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      DropdownButtonFormField<String>(
-                        // ignore: deprecated_member_use
-                        value: ctrl.availableModels.contains(ctrl.model)
-                            ? ctrl.model
-                            : ctrl.availableModels.first,
-                        dropdownColor: HrtbrkrColors.panel,
-                        decoration: InputDecoration(
-                          labelText: 'Model tier',
-                          filled: true,
-                          fillColor: HrtbrkrColors.panel,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(14),
-                            borderSide: BorderSide.none,
-                          ),
-                        ),
-                        items: ctrl.availableModels
-                            .map(
-                              (m) => DropdownMenuItem(
-                                value: m,
-                                child: Text(m),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 240),
+                      curve: Curves.easeOutCubic,
+                      child: _showAdvanced
+                          ? Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Column(
+                                children: [
+                                  TextField(
+                                    controller: _urlController,
+                                    enabled: !connecting,
+                                    keyboardType: TextInputType.url,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Server URL',
+                                      hintText: kDefaultEdge0BaseUrl,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  DropdownButtonFormField<String>(
+                                    // ignore: deprecated_member_use
+                                    value: ctrl.availableModels
+                                            .contains(ctrl.model)
+                                        ? ctrl.model
+                                        : ctrl.availableModels.first,
+                                    dropdownColor: HrtbrkrColors.raised,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Model',
+                                    ),
+                                    items: ctrl.availableModels
+                                        .map(
+                                          (m) => DropdownMenuItem(
+                                            value: m,
+                                            child: Text(m),
+                                          ),
+                                        )
+                                        .toList(),
+                                    onChanged: connecting
+                                        ? null
+                                        : (v) {
+                                            if (v != null) ctrl.setModel(v);
+                                          },
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: TextButton.icon(
+                                      onPressed: () async {
+                                        await Clipboard.setData(
+                                          const ClipboardData(
+                                            text: 'ollama run hrtbrkr',
+                                          ),
+                                        );
+                                        if (context.mounted) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text('Copied'),
+                                              backgroundColor:
+                                                  HrtbrkrColors.raised,
+                                            ),
+                                          );
+                                        }
+                                      },
+                                      icon: const Icon(
+                                        Icons.copy_rounded,
+                                        size: 16,
+                                        color: HrtbrkrColors.pink,
+                                      ),
+                                      label: const Text(
+                                        'Copy ollama run hrtbrkr',
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             )
-                            .toList(),
-                        onChanged: connecting
-                            ? null
-                            : (v) {
-                                if (v != null) ctrl.setModel(v);
-                              },
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        'On Android emulator use http://10.0.2.2:8000 to reach Edge0 on your Mac.',
-                        style: TextStyle(
-                          color: HrtbrkrColors.mist.withValues(alpha: 0.85),
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                    const Spacer(flex: 1),
-                    Text(
-                      'Start a local model first: ollama run llama3.2:3b   or   edge0 serve edge0-8b',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: HrtbrkrColors.mist.withValues(alpha: 0.75),
-                            fontSize: 12,
-                          ),
+                          : const SizedBox.shrink(),
                     ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          const ClipboardData(
-                            text: 'ollama run llama3.2:3b',
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Command copied')),
-                          );
-                        }
-                      },
-                      child: const Text(
-                        'Copy ollama command',
-                        style: TextStyle(color: HrtbrkrColors.mist, fontSize: 12),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                    const Spacer(flex: 2),
                   ],
                 ),
               ),

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'hrtbrkr_theme.dart';
 
-/// Brand mark — broken heart (two halves with a visible gap).
+/// Brand mark — broken heart on a pink disc.
 class HrtbrkrLogo extends StatelessWidget {
   const HrtbrkrLogo({
     super.key,
@@ -15,22 +15,17 @@ class HrtbrkrLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glyph = iconSize ?? size * 0.58;
+    final glyph = iconSize ?? size * 0.56;
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          colors: [HrtbrkrColors.mint, HrtbrkrColors.cyan],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [HrtbrkrColors.pinkSoft, HrtbrkrColors.pink],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: HrtbrkrColors.mint.withValues(alpha: 0.35),
-            blurRadius: size * 0.4,
-            spreadRadius: size > 60 ? 2 : 0,
-          ),
-        ],
       ),
       alignment: Alignment.center,
       child: SizedBox(
