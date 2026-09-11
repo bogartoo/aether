@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'aether_theme.dart';
+import 'hrtbrkr_theme.dart';
 
-/// Brand mark — broken heart (two halves with a visible gap).
-class AetherLogo extends StatelessWidget {
-  const AetherLogo({
+/// Brand mark — broken heart on a pink disc.
+class HrtbrkrLogo extends StatelessWidget {
+  const HrtbrkrLogo({
     super.key,
     this.size = 40,
     this.iconSize,
@@ -15,22 +15,17 @@ class AetherLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glyph = iconSize ?? size * 0.58;
+    final glyph = iconSize ?? size * 0.56;
     return Container(
       width: size,
       height: size,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: const LinearGradient(
-          colors: [AetherColors.mint, AetherColors.cyan],
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [HrtbrkrColors.pinkSoft, HrtbrkrColors.pink],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: AetherColors.mint.withValues(alpha: 0.35),
-            blurRadius: size * 0.4,
-            spreadRadius: size > 60 ? 2 : 0,
-          ),
-        ],
       ),
       alignment: Alignment.center,
       child: SizedBox(
@@ -49,11 +44,9 @@ class _BrokenHeartPainter extends CustomPainter {
     final w = size.width;
     final h = size.height;
     final path = Path();
-    // Left lobe + left side of point, ending at jagged crack edge.
     path.moveTo(w * 0.48, h * 0.28);
     path.cubicTo(w * 0.48, h * 0.16, w * 0.38, h * 0.04, w * 0.26, h * 0.12);
     path.cubicTo(w * -0.02, h * 0.28, w * 0.08, h * 0.58, w * 0.42, h * 0.90);
-    // Jagged break climbing back up the center-left.
     path.lineTo(w * 0.38, h * 0.72);
     path.lineTo(w * 0.50, h * 0.58);
     path.lineTo(w * 0.36, h * 0.44);
@@ -69,7 +62,6 @@ class _BrokenHeartPainter extends CustomPainter {
     path.moveTo(w * 0.52, h * 0.28);
     path.cubicTo(w * 0.52, h * 0.16, w * 0.62, h * 0.04, w * 0.74, h * 0.12);
     path.cubicTo(w * 1.02, h * 0.28, w * 0.92, h * 0.58, w * 0.58, h * 0.90);
-    // Jagged break (offset right so a gap remains).
     path.lineTo(w * 0.62, h * 0.72);
     path.lineTo(w * 0.50, h * 0.58);
     path.lineTo(w * 0.64, h * 0.44);
@@ -85,7 +77,6 @@ class _BrokenHeartPainter extends CustomPainter {
       ..style = PaintingStyle.fill
       ..isAntiAlias = true;
 
-    // Slight horizontal separation so the break reads clearly.
     canvas.save();
     canvas.translate(-size.width * 0.03, 0);
     canvas.drawPath(_leftHalf(size), paint);

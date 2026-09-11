@@ -1,5 +1,5 @@
-name: aether
-description: Aether — local + hybrid AI agent system.
+name: hrtbrkr
+description: HRTBRKR — personal AI agent powered by a local Edge0 LLM.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -13,7 +13,6 @@ dependencies:
   http: ^1.5.0
   flutter_secure_storage: ^9.2.4
   shared_preferences: ^2.5.3
-  url_launcher: ^6.3.2
   google_fonts: ^6.3.2
   provider: ^6.1.5
 
