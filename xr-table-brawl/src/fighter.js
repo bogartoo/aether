@@ -231,14 +231,25 @@ export function updateFighter(f, input, table, dt, other, onEvent) {
     f.vy = 0;
     f.onGround = true;
     f.jumpsLeft = 2;
-  } else if (!overTable || f.y > topY + 0.02) {
-    if (!(overTable && f.y >= topY)) f.onGround = false;
+  } else if (!overTable) {
+    f.onGround = false;
   }
 
-  // Auto ledge-grab when slipping past the lip while falling
-  if (!f.onGround && f.vy <= 0 && f.y < topY + 0.2 && f.y > topY - 0.85) {
-    const nearLeft = f.x < leftEdge + LEDGE_GRAB_RANGE && f.x > leftEdge - LEDGE_GRAB_RANGE * 2;
-    const nearRight = f.x > rightEdge - LEDGE_GRAB_RANGE && f.x < rightEdge + LEDGE_GRAB_RANGE * 2;
+  // Walk-off: start falling immediately past the lip
+  if (!overTable && f.y >= topY - 0.01 && f.vy >= 0) {
+    f.vy = Math.min(f.vy, -0.5);
+  }
+
+  // Auto ledge-grab when slipping past the lip
+  if (
+    !f.onGround &&
+    !f.hanging &&
+    f.y < topY + 0.25 &&
+    f.y > topY - 0.95 &&
+    f.vy <= 1.5
+  ) {
+    const nearLeft = f.x < leftEdge + LEDGE_GRAB_RANGE && f.x > leftEdge - LEDGE_GRAB_RANGE * 2.5;
+    const nearRight = f.x > rightEdge - LEDGE_GRAB_RANGE && f.x < rightEdge + LEDGE_GRAB_RANGE * 2.5;
     if (nearLeft || nearRight) {
       f.hanging = true;
       f.hangSide = nearLeft ? -1 : 1;
