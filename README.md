@@ -34,13 +34,15 @@ Ready-to-install Android builds are in [`releases/`](./releases/):
 
 Rebuild `aether.apk` after pulling this branch to pick up Grok sign-in.
 
-## Build from source
+## Brinkbound (XR table fighter)
+
+Free WebXR smash-style platform fighter for Meta Quest 3 + desktop — **no Unity, no paid license**.
 
 ```bash
-flutter pub get
-flutter run                 # device / emulator / chrome
-flutter build apk --release
+cd xr-table-brawl && npm install && npm run dev
 ```
+
+See [`xr-table-brawl/README.md`](./xr-table-brawl/README.md). Original roster (not Nintendo IP).
 
 ## Dev notes
 
