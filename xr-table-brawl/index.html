@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Table Edge Brawl — XR Pass-through Fighter</title>
+    <meta
+      name="description"
+      content="Original XR platform fighter. Drop fighters on your real table, hang from the edge, blast rivals off. Quest pass-through + desktop sim."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="boot">
+      <div class="boot-bg" aria-hidden="true"></div>
+      <header class="boot-hero">
+        <p class="eyebrow">XR · pass-through · original fighters</p>
+        <h1>TABLE EDGE<br />BRAWL</h1>
+        <p class="tagline">
+          Plant two fighters on your real table. Hang off the ledge. Blast them into the void.
+        </p>
+        <div class="cta-row">
+          <button id="btn-desktop" type="button" class="btn primary">Play desktop sim</button>
+          <button id="btn-vs-ai" type="button" class="btn ghost">Play vs AI</button>
+          <button id="btn-xr" type="button" class="btn ghost" disabled>
+            Enter AR pass-through
+          </button>
+        </div>
+        <p id="xr-hint" class="hint">
+          Open this page in Meta Quest Browser for immersive AR. Desktop runs a full table simulator.
+        </p>
+      </header>
+
+      <section class="boot-how">
+        <h2>How it plays</h2>
+        <p>
+          Percent climbs. Knockback grows. Grab the table lip when you slip — climb up or jump off into a
+          counter. No Nintendo characters. Just original ledge brawlers on furniture.
+        </p>
+      </section>
+    </div>
+
+    <div id="hud" class="hidden">
+      <div class="stock-bar">
+        <div class="fighter-hud p1">
+          <span class="name" id="p1-name">Rivet</span>
+          <span class="pct" id="p1-pct">0%</span>
+          <span class="stocks" id="p1-stocks"></span>
+        </div>
+        <div class="center-meta">
+          <span id="mode-label">DESKTOP SIM</span>
+          <button id="btn-reset" type="button" class="btn tiny">Reset</button>
+          <button id="btn-exit" type="button" class="btn tiny ghost">Exit</button>
+        </div>
+        <div class="fighter-hud p2">
+          <span class="name" id="p2-name">Bolt</span>
+          <span class="pct" id="p2-pct">0%</span>
+          <span class="stocks" id="p2-stocks"></span>
+        </div>
+      </div>
+      <div id="toast" class="toast hidden"></div>
+      <aside id="controls-help" class="controls-help">
+        <strong>P1</strong> WASD move · J attack · K special · L jump · I grab ledge / climb<br />
+        <strong>P2</strong> arrows · 1 attack · 2 special · 3 jump · 5 climb
+      </aside>
+    </div>
+
+    <canvas id="game"></canvas>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

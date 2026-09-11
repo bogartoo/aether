@@ -34,13 +34,15 @@ Ready-to-install Android builds are in [`releases/`](./releases/):
 
 Rebuild `aether.apk` after pulling this branch to pick up Grok sign-in.
 
-## Build from source
+## XR: Table Edge Brawl
+
+Original WebXR / desktop platform fighter (pass-through table ledge brawl) lives in [`xr-table-brawl/`](./xr-table-brawl/):
 
 ```bash
-flutter pub get
-flutter run                 # device / emulator / chrome
-flutter build apk --release
+cd xr-table-brawl && npm install && npm run dev
 ```
+
+See that folder’s README for Quest AR instructions. Not affiliated with Nintendo.
 
 ## Dev notes
 
