@@ -75,10 +75,12 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           Text(
                             'HRTBRKR',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style:
                                 Theme.of(context).textTheme.titleLarge?.copyWith(
                                       fontSize: 18,
-                                      letterSpacing: 5,
+                                      letterSpacing: 3,
                                       fontWeight: FontWeight.w800,
                                     ),
                           ),

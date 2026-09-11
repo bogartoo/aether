@@ -78,14 +78,20 @@ class _ConnectScreenState extends State<ConnectScreen>
                       ),
                     ),
                     const SizedBox(height: 32),
-                    Text(
-                      'HRTBRKR',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                            fontSize: 42,
-                            letterSpacing: 10,
-                            fontWeight: FontWeight.w800,
-                          ),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        'HRTBRKR',
+                        maxLines: 1,
+                        softWrap: false,
+                        textAlign: TextAlign.center,
+                        style:
+                            Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  fontSize: 40,
+                                  letterSpacing: 6,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                      ),
                     ),
                     const SizedBox(height: 16),
                     Text(

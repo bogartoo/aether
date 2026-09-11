@@ -10,7 +10,7 @@ class HrtbrkrColors {
   static const line = Color(0xFF2A2A30);
   static const pink = Color(0xFFFF3D8A);
   static const pinkSoft = Color(0xFFFF7AB5);
-  static const pinkDim = Color(0x2EFF3D8A);
+  static const pinkDim = Color(0x44FF3D8A);
   static const white = Color(0xFFF5F5F7);
   static const mute = Color(0xFF8A8A96);
   static const danger = Color(0xFFFF6B81);
